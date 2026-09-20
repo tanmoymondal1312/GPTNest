@@ -1962,8 +1962,8 @@
 
 .gp-brand-icon {
     position: relative;
-    width: 36px;
-    height: 36px;
+    width: 42px;
+    height: 42px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1987,7 +1987,7 @@
         #22c55e,
         #a855f7
     );
-    opacity: 0.65;
+    opacity: 0.4;
     filter: blur(7px);
     animation: gp-brand-spin 4s linear infinite;
 }
