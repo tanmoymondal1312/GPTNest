@@ -155,13 +155,20 @@ window.MMUI = (function () {
         var done = items.filter(function (i) { return i.status === 'completed'; }).length;
         var failed = items.filter(function (i) { return i.status === 'error'; }).length;
         var analyzing = items.filter(function (i) { return i.status === 'analyzing'; }).length;
+        var pending = items.filter(function (i) { return i.status === 'idle' || i.status === 'preview_ready'; }).length;
+        var renderEps = items.filter(function (i) { return i.status === 'rendering_eps'; }).length;
 
         container.innerHTML =
             '<div class="gp-batch-header">' +
-            '<div class="gp-batch-stats"><strong>' + items.length + '</strong> files | <strong style="color:var(--success)">' + done + '</strong> done | <strong style="color:#06b6d4">' + analyzing + '</strong> processing | <strong style="color:var(--error)">' + failed + '</strong> failed</div>' +
+            '<div class="gp-batch-stats"><strong>' + items.length + '</strong> files' +
+            ' &middot; <strong style="color:var(--success)">' + done + '</strong> done' +
+            ' &middot; <strong style="color:#06b6d4">' + (analyzing + renderEps) + '</strong> processing' +
+            ' &middot; <strong style="color:var(--text-muted)">' + pending + '</strong> pending' +
+            (failed > 0 ? ' &middot; <strong style="color:var(--error)">' + failed + '</strong> failed' : '') +
+            '</div>' +
             '<div class="gp-batch-actions">' +
             '<button class="gp-field-btn" id="gp-batch-add" type="button">+ Add Files</button>' +
-            '<button class="gp-field-btn primary" id="gp-batch-generate" type="button">Generate All</button>' +
+            '<button class="gp-field-btn primary" id="gp-batch-generate" type="button">⚡ Generate All' + (pending > 0 ? ' (' + pending + ')' : '') + '</button>' +
             '<button class="gp-field-btn" id="gp-batch-export-csv" type="button">📥 CSV</button>' +
             '<button class="gp-field-btn" id="gp-batch-export-json" type="button">📥 JSON</button>' +
             '<button class="gp-field-btn" id="gp-batch-clear" type="button">Clear All</button>' +
@@ -169,13 +176,15 @@ window.MMUI = (function () {
             '<table class="gp-table"><thead><tr><th><input type="checkbox" id="gp-check-all" title="Select all"></th><th>Preview</th><th>Filename</th><th>Title</th><th>Keywords</th><th>Status</th><th></th></tr></thead><tbody>' +
             items.map(function (item, idx) {
                 var statusClass = item.status === 'completed' ? 'done' : item.status === 'analyzing' ? 'analyzing' : item.status === 'error' ? 'failed' : 'ready';
+                var statusText = item.status === 'completed' ? 'Done' : item.status === 'analyzing' ? 'Analyzing...' : item.status === 'rendering_eps' ? 'Rendering...' : item.status === 'error' ? 'Failed' : 'Ready';
+                var errorTip = item.status === 'error' && item.errorMessage ? ' title="' + escapeHtml(item.errorMessage) + '"' : '';
                 return '<tr data-idx="' + idx + '">' +
                     '<td><input type="checkbox" class="gp-batch-check" data-idx="' + idx + '"></td>' +
                     '<td><img class="gp-table-thumb" src="' + (item.previewUrl || '') + '" alt=""></td>' +
                     '<td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + escapeHtml(item.fileName) + '">' + escapeHtml(item.fileName) + '</td>' +
-                    '<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + escapeHtml(item.title || '—') + '</td>' +
+                    '<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + escapeHtml(item.title || (item.status === 'error' ? (item.errorMessage || '—') : '—')) + '</td>' +
                     '<td>' + (item.keywords ? item.keywords.length : 0) + '</td>' +
-                    '<td><span class="gp-status-badge ' + statusClass + '">' + (item.status === 'completed' ? 'Done' : item.status === 'analyzing' ? 'Analyzing...' : item.status === 'error' ? 'Failed' : 'Ready') + '</span></td>' +
+                    '<td><span class="gp-status-badge ' + statusClass + '"' + errorTip + '>' + statusText + '</span></td>' +
                     '<td class="gp-view-hint">View →</td></tr>';
             }).join('') +
             '</tbody></table>';

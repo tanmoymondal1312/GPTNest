@@ -69,72 +69,90 @@ window.MMGeminiService = (function () {
             };
         }
 
-        var attempt = 0, lastError = null, lastStatus = 500;
-        while (attempt <= MMConfig.MAX_RETRY) {
-            try {
-                var res = await fetch('/api/analyze-metadata/', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        image: item.base64Data, mimeType: item.mimeType || 'image/png',
-                        fileName: item.fileName, fileType: item.fileType,
-                        platform: platform, settings: settings, fileHash: item.fileHash,
-                        model: model || '',
-                    }),
-                });
-                lastStatus = res.status;
-                if (!res.ok) {
-                    var errorData = await res.json().catch(function () { return {}; });
-                    var e = new Error(errorData.error || 'HTTP ' + res.status);
-                    e.errorCode = errorData.errorCode; e.technicalDetails = errorData.technicalDetails || errorData.error;
-                    throw e;
+        var modelsToTry = model ? [model].concat(MMConfig.GEMINI_MODELS.filter(function (m) { return m !== model; })) : MMConfig.GEMINI_MODELS.slice();
+
+        for (var mi = 0; mi < modelsToTry.length; mi++) {
+            var currentModel = modelsToTry[mi];
+            var attempt = 0, lastError = null, lastStatus = 500;
+
+            while (attempt <= MMConfig.MAX_RETRY) {
+                try {
+                    var res = await fetch('/api/analyze-metadata/', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            image: item.base64Data, mimeType: item.mimeType || 'image/png',
+                            fileName: item.fileName, fileType: item.fileType,
+                            platform: platform, settings: settings, fileHash: item.fileHash,
+                            model: currentModel,
+                        }),
+                    });
+                    lastStatus = res.status;
+                    if (!res.ok) {
+                        var errorData = await res.json().catch(function () { return {}; });
+                        var e = new Error(errorData.error || 'HTTP ' + res.status);
+                        e.errorCode = errorData.errorCode; e.technicalDetails = errorData.technicalDetails || errorData.error;
+                        throw e;
+                    }
+                    var data = await res.json();
+                    var analysisData = data.analysis || data.visual_analysis || {
+                        main_subject: 'Artwork', objects: [], visible_text: [], style: 'Graphic',
+                        theme: 'Design', colors: [], background: 'Transparent', composition: 'Centered',
+                        content_type: 'Vector', confidence: 90,
+                    };
+
+                    var aiMetadata = data.metadata || {};
+                    var adapted2 = MMUI.adaptMetadataForPlatform(analysisData, aiMetadata, platform, settings);
+
+                    var metaValidation = _validateMetadata(adapted2);
+                    if (!metaValidation.valid) {
+                        var ve = new Error('Metadata validation failed: ' + metaValidation.reason);
+                        ve.errorCode = 'METADATA_INVALID';
+                        throw ve;
+                    }
+
+                    if (item.fileHash) MMCache.set(item.fileHash, analysisData, aiMetadata);
+
+                    return {
+                        success: true,
+                        item: Object.assign({}, item, {
+                            analysis: analysisData, confidence: analysisData.confidence || 90,
+                            title: adapted2.title, description: adapted2.description, keywords: adapted2.keywords,
+                            primaryCategory: adapted2.primaryCategory || aiMetadata.category || 'Graphic Resources',
+                            secondaryCategory: adapted2.secondaryCategory || aiMetadata.secondary_category || 'Design',
+                            contentType: analysisData.content_type || 'Vector',
+                            visualStyle: analysisData.style || 'Graphic',
+                            dominantColors: analysisData.colors || [],
+                            backgroundType: analysisData.background || 'Transparent',
+                            mainSubject: analysisData.main_subject || 'Artwork',
+                            qualityScore: adapted2.qualityScore, validation: adapted2.validation,
+                            status: 'completed', errorMessage: undefined, apiError: undefined,
+                        }),
+                    };
+                } catch (err2) {
+                    lastError = err2; attempt++;
+                    var isRetryable = lastStatus === 429 || lastStatus === 503 || lastStatus === 504 || (err2.message && (err2.message.includes('429') || err2.message.includes('RESOURCE_EXHAUSTED') || err2.message.includes('TIMEOUT')));
+                    if (isRetryable && attempt <= MMConfig.MAX_RETRY) {
+                        var delay = MMConfig.RETRY_DELAYS[attempt - 1] || 5000;
+                        await new Promise(function (r) { setTimeout(r, delay); });
+                    } else { break; }
                 }
-                var data = await res.json();
-                var analysisData = data.analysis || data.visual_analysis || {
-                    main_subject: 'Artwork', objects: [], visible_text: [], style: 'Graphic',
-                    theme: 'Design', colors: [], background: 'Transparent', composition: 'Centered',
-                    content_type: 'Vector', confidence: 90,
-                };
+            }
 
-                var aiMetadata = data.metadata || {};
-                var adapted2 = MMUI.adaptMetadataForPlatform(analysisData, aiMetadata, platform, settings);
+            var isModelFailure = lastStatus === 404 || lastStatus === 403 || (lastError && lastError.message && (lastError.message.includes('not found') || lastError.message.includes('404') || lastError.message.includes('NOT_FOUND')));
+            if (isModelFailure && mi < modelsToTry.length - 1) {
+                MMUI.showToast('Model Fallback', 'Model "' + currentModel + '" unavailable. Trying next model...', 'warning');
+                continue;
+            }
 
-                var metaValidation = _validateMetadata(adapted2);
-                if (!metaValidation.valid) {
-                    var ve = new Error('Metadata validation failed: ' + metaValidation.reason);
-                    ve.errorCode = 'METADATA_INVALID';
-                    throw ve;
-                }
-
-                if (item.fileHash) MMCache.set(item.fileHash, analysisData, aiMetadata);
-
-                return {
-                    success: true,
-                    item: Object.assign({}, item, {
-                        analysis: analysisData, confidence: analysisData.confidence || 90,
-                        title: adapted2.title, description: adapted2.description, keywords: adapted2.keywords,
-                        primaryCategory: adapted2.primaryCategory || aiMetadata.category || 'Graphic Resources',
-                        secondaryCategory: adapted2.secondaryCategory || aiMetadata.secondary_category || 'Design',
-                        contentType: analysisData.content_type || 'Vector',
-                        visualStyle: analysisData.style || 'Graphic',
-                        dominantColors: analysisData.colors || [],
-                        backgroundType: analysisData.background || 'Transparent',
-                        mainSubject: analysisData.main_subject || 'Artwork',
-                        qualityScore: adapted2.qualityScore, validation: adapted2.validation,
-                        status: 'completed', errorMessage: undefined, apiError: undefined,
-                    }),
-                };
-            } catch (err2) {
-                lastError = err2; attempt++;
-                var isRetryable = lastStatus === 429 || lastStatus === 503 || lastStatus === 504 || (err2.message && (err2.message.includes('429') || err2.message.includes('RESOURCE_EXHAUSTED') || err2.message.includes('TIMEOUT')));
-                if (isRetryable && attempt <= MMConfig.MAX_RETRY) {
-                    var delay = MMConfig.RETRY_DELAYS[attempt - 1] || 5000;
-                    await new Promise(function (r) { setTimeout(r, delay); });
-                } else { break; }
+            if (mi === modelsToTry.length - 1) {
+                var apiError = formatApiError(lastError, lastStatus);
+                return { success: false, item: Object.assign({}, item, { status: 'error', errorMessage: apiError.userMessage, apiError: apiError }), error: apiError };
             }
         }
-        var apiError = formatApiError(lastError, lastStatus);
-        return { success: false, item: Object.assign({}, item, { status: 'error', errorMessage: apiError.userMessage, apiError: apiError }), error: apiError };
+
+        var finalApiError = formatApiError(lastError || new Error('All models failed'), lastStatus || 500);
+        return { success: false, item: Object.assign({}, item, { status: 'error', errorMessage: finalApiError.userMessage, apiError: finalApiError }), error: finalApiError };
     }
 
     async function reverseEngineerPrompt(item) {
@@ -273,7 +291,7 @@ window.MMExport = (function () {
                 MMUI.showToast('Export', excludedCount + ' file(s) excluded (incomplete/failed)', 'info');
             }
 
-            var headers = ['Filename', 'Title', 'Description', 'Keywords', 'Category', 'Secondary Category'];
+            var headers = ['Filename', 'Title', 'Description', 'Keywords'];
             var rows = readyItems.map(function (item) {
                 var kwString = Array.isArray(item.keywords) ? item.keywords.join(', ') : '';
                 return [
@@ -281,14 +299,12 @@ window.MMExport = (function () {
                     escapeCsvField(item.title),
                     escapeCsvField(item.description),
                     escapeCsvField(kwString),
-                    escapeCsvField(item.primaryCategory || ''),
-                    escapeCsvField(item.secondaryCategory || ''),
                 ].join(',');
             });
 
-            var csvContent = headers.join(',') + '\r\n' + rows.join('\r\n');
-            downloadBlob(csvContent, filename || 'golap_metadata.csv', 'text/csv;charset=utf-8;');
-            MMUI.showToast('Export', readyItems.length + ' file(s) exported as CSV', 'success');
+            var csvContent = '\uFEFF' + headers.join(',') + '\r\n' + rows.join('\r\n');
+            downloadBlob(csvContent, filename || 'csvgpt_stock_metadata.csv', 'text/csv;charset=utf-8;');
+            MMUI.showToast('Export', readyItems.length + ' file(s) exported as CSV for Adobe Stock', 'success');
         },
         toJson: function (items, filename) {
             if (!items || !items.length) return;

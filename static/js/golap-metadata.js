@@ -77,15 +77,14 @@
         if (state.mode === 'prompt' && state.selectedItem) {
             promptView.style.display = '';
             MMUI.renderPromptView(promptView, state.selectedItem);
-        } else if (state.items.length === 1 && state.selectedItem) {
+        } else if (state.view === 'detail' && state.selectedItem) {
             detailView.style.display = '';
             MMUI.renderDetailView(detailView, state.selectedItem, state.platform, { onBind: bindDetailViewEvents });
-        } else if (state.items.length > 1) {
+        } else if (state.items.length >= 1) {
             batchView.style.display = '';
             MMUI.renderBatchView(batchView, state.items, state.platform, { onBind: bindBatchViewEvents });
-        } else if (state.selectedItem) {
-            detailView.style.display = '';
-            MMUI.renderDetailView(detailView, state.selectedItem, state.platform, { onBind: bindDetailViewEvents });
+        } else {
+            uploadView.style.display = '';
         }
     }
 
@@ -232,6 +231,20 @@
         }
         if (pending.length === 0) { MMUI.showToast('Info', checkedIndices.length > 0 ? 'Selected files already processed or no artwork' : 'No files to process', 'info'); return; }
 
+        var hasApiKeys = false;
+        try {
+            var kr = await fetch('/api/keys/');
+            var kd = await kr.json();
+            hasApiKeys = kd.keys && kd.keys.length > 0;
+        } catch (e) { /* ignore */ }
+
+        if (!hasApiKeys) {
+            MMUI.showToast('API Key Required', 'Please add a Gemini API key before generating metadata.', 'error');
+            var modal = document.getElementById('gp-api-modal-overlay');
+            if (modal) modal.style.display = '';
+            return;
+        }
+
         var progressEl = $('gp-progress');
         var fillEl = $('gp-progress-fill');
         var textEl = $('gp-progress-text');
@@ -260,8 +273,19 @@
             onBatchComplete: function () {
                 progressEl.style.display = 'none';
                 $('gp-rate-limit').style.display = 'none';
-                MMUI.showToast('Batch Complete', 'All files processed', 'success');
+                var failed = state.items.filter(function (i) { return i.status === 'error'; }).length;
+                var succeeded = state.items.filter(function (i) { return i.status === 'completed'; }).length;
+                if (failed > 0 && succeeded === 0) {
+                    MMUI.showToast('Generation Failed', 'All files failed. Check API key and try again.', 'error');
+                } else if (failed > 0) {
+                    MMUI.showToast('Partial Success', succeeded + ' completed, ' + failed + ' failed. Exporting CSV for completed files...', 'warning');
+                } else {
+                    MMUI.showToast('Batch Complete', 'All ' + succeeded + ' files processed successfully.', 'success');
+                }
                 updateView();
+                setTimeout(function () {
+                    MMExport.toCsv(state.items);
+                }, 800);
             },
         }, state.selectedModel);
     }
@@ -373,6 +397,9 @@
             state.items = []; state.selectedItem = null; state.view = 'upload';
             updateView();
         });
+
+        var addBtn = $('gp-batch-add');
+        if (addBtn) addBtn.addEventListener('click', function () { $('gp-file-input').click(); });
     }
 
     function checkAndRenderModels() {
@@ -482,8 +509,8 @@
         });
 
         $('gp-btn-back').addEventListener('click', function () {
-            if (state.items.length > 1) { state.selectedItem = null; state.view = 'batch'; }
-            else { state.items = []; state.selectedItem = null; state.view = 'upload'; }
+            state.selectedItem = null;
+            state.view = 'batch';
             updateView();
         });
         $('gp-btn-regen-all').addEventListener('click', function () {
@@ -616,6 +643,13 @@
 
     async function handleFiles(files) {
         if (!files || files.length === 0) return;
+
+        var MAX_FILES = 500;
+        if (files.length > MAX_FILES) {
+            MMUI.showToast('Limit', 'Maximum ' + MAX_FILES + ' files allowed at once', 'error');
+            files = Array.prototype.slice.call(files, 0, MAX_FILES);
+        }
+
         try {
             $('gp-progress').style.display = '';
             $('gp-progress-fill').style.width = '0%';
@@ -627,18 +661,10 @@
                 $('gp-progress-text').textContent = 'Processing ' + (i + 1) + '/' + files.length + ': ' + files[i].name;
                 var item = await processFile(files[i]);
                 state.items.push(item);
-                if (files.length === 1 && item.status !== 'error') {
-                    state.selectedItem = item;
-                }
             }
 
             $('gp-progress').style.display = 'none';
-
-            if (state.items.length === 1 && state.selectedItem && state.selectedItem.status !== 'error') {
-                generateSingle(state.selectedItem);
-            } else {
-                updateView();
-            }
+            updateView();
         } catch (e) {
             console.error('[GP] handleFiles error:', e);
             $('gp-progress').style.display = 'none';
