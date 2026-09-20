@@ -1,0 +1,424 @@
+﻿{% extends "base.html" %}
+{% load static %}
+
+{% block title %}GPTNest - AI Metadata Generator{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/golap-metadata.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="gp-app" id="gp-app">
+    <div class="gp-sidebar-overlay" id="gp-sidebar-overlay"></div>
+
+    <aside class="gp-sidebar" id="gp-sidebar">
+        <div class="gp-sidebar-inner">
+            <div class="gp-sidebar-brand">
+                <div class="gp-brand-icon">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="#fff"><circle cx="12" cy="12" r="3"/><path d="M12 1.5c0 2.5-2.5 4.5-2.5 4.5s2.5 2 2.5 4.5c0-2.5 2.5-4.5 2.5-4.5S12 4 12 1.5z" opacity=".9"/><path d="M12 1.5c0 2.5-2.5 4.5-2.5 4.5s2.5 2 2.5 4.5c0-2.5 2.5-4.5 2.5-4.5S12 4 12 1.5z" opacity=".9" transform="rotate(60 12 12)"/><path d="M12 1.5c0 2.5-2.5 4.5-2.5 4.5s2.5 2 2.5 4.5c0-2.5 2.5-4.5 2.5-4.5S12 4 12 1.5z" opacity=".9" transform="rotate(120 12 12)"/><path d="M12 1.5c0 2.5-2.5 4.5-2.5 4.5s2.5 2 2.5 4.5c0-2.5 2.5-4.5 2.5-4.5S12 4 12 1.5z" opacity=".9" transform="rotate(180 12 12)"/><path d="M12 1.5c0 2.5-2.5 4.5-2.5 4.5s2.5 2 2.5 4.5c0-2.5 2.5-4.5 2.5-4.5S12 4 12 1.5z" opacity=".9" transform="rotate(240 12 12)"/><path d="M12 1.5c0 2.5-2.5 4.5-2.5 4.5s2.5 2 2.5 4.5c0-2.5 2.5-4.5 2.5-4.5S12 4 12 1.5z" opacity=".9" transform="rotate(300 12 12)"/></svg>
+                </div>
+                <div class="gp-brand-text">
+                    <h1>GPTNest</h1>
+                    <span class="gp-pro-badge">Pro</span>
+                </div>
+            </div>
+
+            <div class="gp-extension-card">
+                <h4>Get GPTNest Extension</h4>
+                <p>Generate metadata faster with our Chrome extension.</p>
+                <button type="button">Install Extension</button>
+            </div>
+
+            <nav class="gp-nav" aria-label="Main navigation">
+                <div class="gp-nav-label">Menu</div>
+                <button class="gp-nav-item active" data-nav="generator" type="button">
+                    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                    Generator
+                </button>
+                <button class="gp-nav-item" data-nav="analytics" type="button">
+                    <svg viewBox="0 0 24 24"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg>
+                    Adobe Analytics
+                </button>
+                <button class="gp-nav-item" data-nav="tools" type="button">
+                    <svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+                    All Tools
+                </button>
+                <div id="gp-toggles-section" style="display:none">
+                <div class="gp-model-selector" id="gp-model-selector" style="padding:0 16px">
+                    <div class="gp-model-loading">Checking models...</div>
+                </div>
+                <input type="hidden" id="gp-selected-model" value="">
+                <div style="padding:0 16px;margin-top:8px">
+                    <div class="gp-slider-row"><span class="gp-slider-label"><span>Title Words</span></span><span class="gp-slider-val" id="gp-title-val">8 &#8211; 22</span></div>
+                    <input type="range" class="gp-slider" id="gp-min-title" min="4" max="15" value="8">
+                    <input type="range" class="gp-slider" id="gp-max-title" min="12" max="35" value="22">
+                    <div class="gp-slider-row"><span class="gp-slider-label"><span>Keywords</span></span><span class="gp-slider-val" id="gp-kw-val">25 &#8211; 49</span></div>
+                    <input type="range" class="gp-slider" id="gp-min-kw" min="10" max="35" value="25">
+                    <input type="range" class="gp-slider" id="gp-max-kw" min="25" max="50" value="49">
+                    <div class="gp-slider-row"><span class="gp-slider-label"><span>Description Words</span></span><span class="gp-slider-val" id="gp-desc-val">18 &#8211; 32</span></div>
+                    <input type="range" class="gp-slider" id="gp-min-desc" min="10" max="25" value="18">
+                    <input type="range" class="gp-slider" id="gp-max-desc" min="25" max="50" value="32">
+                </div>
+                <div style="padding:8px 16px"><button class="gp-btn-reset" id="gp-reset-btn" type="button" style="width:100%;padding:8px;border:1px solid rgba(255,255,255,.1);border-radius:6px;background:rgba(255,255,255,.05);color:#e0e3ea;font-size:12px;cursor:pointer">Reset Defaults</button></div>
+            </div>
+
+            <div class="gp-nav-divider"></div>
+                <button class="gp-nav-item" data-nav="howto" type="button">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                    How to Use
+                </button>
+                <button class="gp-nav-item" data-nav="live" type="button">
+                    <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                    Live Class
+                </button>
+            </nav>
+
+            <div class="gp-sidebar-credits">
+                <h4>Credits</h4>
+                <div class="gp-credits-number">4,185 <span>left</span></div>
+                <div class="gp-credits-bar"><div class="gp-credits-bar-fill" style="width:84%"></div></div>
+                <div class="gp-credits-info">
+                    <span>84% remaining</span>
+                    <span>Pro Plan</span>
+                </div>
+            </div>
+
+            <div class="gp-sidebar-theme">
+                <div class="gp-theme-selector" id="gp-theme-toggle" role="button" tabindex="0">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                    Light Mode
+                    <svg viewBox="0 0 24 24" style="width:12px;height:12px;margin-left:auto"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </div>
+            </div>
+
+            <div class="gp-sidebar-user">
+                <div class="gp-user-info">
+                    <div class="gp-user-avatar">T</div>
+                    <div>
+                        <div class="gp-user-name">User</div>
+                        <div class="gp-user-plan">Pro Plan</div>
+                    </div>
+                </div>
+                <button class="gp-user-logout" title="Logout" type="button">
+                    <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <div class="gp-main">
+        <div class="gp-header" id="gp-header" style="display:none">
+            <div class="gp-header-left">
+                <button class="gp-sidebar-toggle" id="gp-sidebar-toggle" type="button" aria-label="Toggle sidebar">
+                    <svg viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                </button>
+                <span class="gp-header-filename" id="gp-filename"></span>
+                <span class="gp-platform-badge" id="gp-header-platform"></span>
+            </div>
+            <div class="gp-header-right">
+                <button class="gp-field-btn" id="gp-btn-back" type="button">&#8592; Files</button>
+                <button class="gp-field-btn" id="gp-btn-regen-all" type="button">&#8635; Regenerate</button>
+                <button class="gp-field-btn" id="gp-btn-copy-all" type="button">Copy All</button>
+                <button class="gp-field-btn primary" id="gp-btn-csv" type="button">CSV</button>
+                <button class="gp-field-btn" id="gp-btn-json" type="button">JSON</button>
+            </div>
+        </div>
+
+        <div class="gp-platforms" id="gp-platforms" style="display:none"></div>
+
+        <div class="gp-workspace" id="gp-workspace">
+            <div id="gp-upload-view">
+
+                <div class="gp-content-wrapper">
+
+                    <!-- MIDDLE PANEL: Controls + Metadata Settings -->
+                    <div class="gp-controls-panel">
+
+                        <div class="gp-card">
+                            <div class="gp-card-header">
+                                <div>
+                                    <div class="gp-card-title">
+                                        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                                        Controls
+                                    </div>
+                                    <div class="gp-card-subtitle">Configure your generation settings</div>
+                                </div>
+                                <div class="gp-card-right">
+                                    <span class="gp-pill">Google Gemini</span>
+                                </div>
+                            </div>
+                            <div class="gp-mode-toggle" style="max-width:240px">
+                                <button class="gp-mode-btn active" data-mode="metadata" type="button">Metadata</button>
+                                <button class="gp-mode-btn" data-mode="prompt" type="button">Prompt</button>
+                            </div>
+                        </div>
+
+                        <div class="gp-card">
+                            <div class="gp-card-header" style="margin-bottom:0">
+                                <div style="display:flex;align-items:center;gap:10px">
+                                    <div style="width:32px;height:32px;border-radius:8px;background:rgba(232,160,76,0.1);display:flex;align-items:center;justify-content:center">
+                                        <svg viewBox="0 0 24 24" style="width:16px;height:16px;color:var(--accent,#E8A04C)" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                                    </div>
+                                    <div>
+                                        <div style="font-size:14px;font-weight:600;color:var(--text-primary)">Batch Generation</div>
+                                        <div style="font-size:11px;color:var(--text-muted)">Process multiple at once</div>
+                                    </div>
+                                </div>
+                                <label class="gp-toggle">
+                                    <input type="checkbox" id="gp-batch-toggle">
+                                    <span class="gp-toggle-track"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="gp-card" id="gp-sidebar-settings">
+                            <div class="gp-card-header" style="cursor:pointer" id="gp-settings-toggle">
+                                <div>
+                                    <div class="gp-card-title">
+                                        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                                        Metadata Settings
+                                    </div>
+                                </div>
+                                <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--text-muted);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            </div>
+
+                            <div id="gp-settings-content">
+                                <div class="gp-settings-label">Export Platform</div>
+                                <div class="gp-platform-grid" id="gp-platform-grid">
+                                    <button class="gp-platform-pill active" data-platform="general" type="button">General</button>
+                                    <button class="gp-platform-pill" data-platform="adobe-stock" type="button">Adobe Stock</button>
+                                    <button class="gp-platform-pill" data-platform="shutterstock" type="button">Shutterstock</button>
+                                    <button class="gp-platform-pill" data-platform="freepik" type="button">FreePik</button>
+                                    <button class="gp-platform-pill" data-platform="vecteezy" type="button">Vecteezy</button>
+                                    <button class="gp-platform-pill" data-platform="pond5" type="button">Pond5</button>
+                                </div>
+
+                                <div class="gp-settings-label" style="margin-top:20px">Title Length</div>
+                                <div class="gp-slider-row">
+                                    <span class="gp-slider-label" id="gp-meta-title-val">8 &#8211; 22</span>
+                                    <span class="gp-slider-val">words</span>
+                                </div>
+                                <input type="range" class="gp-slider" id="gp-meta-min-title" min="4" max="15" value="8">
+                                <input type="range" class="gp-slider" id="gp-meta-max-title" min="12" max="35" value="22">
+
+                                <div class="gp-settings-label">Description</div>
+                                <div class="gp-slider-row">
+                                    <span class="gp-slider-label" id="gp-meta-desc-val">18 &#8211; 32</span>
+                                    <span class="gp-slider-val">words</span>
+                                </div>
+                                <input type="range" class="gp-slider" id="gp-meta-min-desc" min="10" max="25" value="18">
+                                <input type="range" class="gp-slider" id="gp-meta-max-desc" min="25" max="50" value="32">
+
+                                <div class="gp-settings-label">Keywords Count</div>
+                                <div class="gp-slider-row">
+                                    <span class="gp-slider-label" id="gp-meta-kw-val">25 &#8211; 49</span>
+                                    <span class="gp-slider-val">keywords</span>
+                                </div>
+                                <input type="range" class="gp-slider" id="gp-meta-min-kw" min="10" max="35" value="25">
+                                <input type="range" class="gp-slider" id="gp-meta-max-kw" min="25" max="50" value="49">
+
+                                <div class="gp-settings-label">Options</div>
+
+                                <div class="gp-toggle-row">
+                                    <div class="gp-toggle-info">
+                                        <span class="gp-toggle-label">Prefix</span>
+                                        <span class="gp-toggle-hint">Add prefix to title</span>
+                                    </div>
+                                    <label class="gp-toggle">
+                                        <input type="checkbox" checked>
+                                        <span class="gp-toggle-track"></span>
+                                    </label>
+                                </div>
+
+                                <div class="gp-toggle-row">
+                                    <div class="gp-toggle-info">
+                                        <span class="gp-toggle-label">Suffix</span>
+                                        <span class="gp-toggle-hint">Add suffix to title</span>
+                                    </div>
+                                    <label class="gp-toggle">
+                                        <input type="checkbox" checked>
+                                        <span class="gp-toggle-track"></span>
+                                    </label>
+                                </div>
+
+                                <div class="gp-toggle-row">
+                                    <div class="gp-toggle-info">
+                                        <label class="gp-toggle-label" for="gp-single-kw">Single Word Keywords</label>
+                                        <span class="gp-toggle-hint">Keywords without spaces</span>
+                                    </div>
+                                    <label class="gp-toggle">
+                                        <input type="checkbox" id="gp-single-kw" checked>
+                                        <span class="gp-toggle-track"></span>
+                                    </label>
+                                </div>
+
+                                <div class="gp-toggle-row">
+                                    <div class="gp-toggle-info">
+                                        <label class="gp-toggle-label" for="gp-silhouette">Silhouette</label>
+                                        <span class="gp-toggle-hint">Mark as silhouette style</span>
+                                    </div>
+                                    <label class="gp-toggle">
+                                        <input type="checkbox" id="gp-silhouette">
+                                        <span class="gp-toggle-track"></span>
+                                    </label>
+                                </div>
+
+                                <div class="gp-toggle-row">
+                                    <div class="gp-toggle-info">
+                                        <label class="gp-toggle-label" for="gp-transparent">Transparent Background</label>
+                                        <span class="gp-toggle-hint">For transparent assets</span>
+                                    </div>
+                                    <label class="gp-toggle">
+                                        <input type="checkbox" id="gp-transparent">
+                                        <span class="gp-toggle-track"></span>
+                                    </label>
+                                </div>
+
+                                <div class="gp-toggle-row">
+                                    <div class="gp-toggle-info">
+                                        <label class="gp-toggle-label" for="gp-custom-prompt">Custom Prompt</label>
+                                        <span class="gp-toggle-hint">Extra instructions for AI</span>
+                                    </div>
+                                    <label class="gp-toggle">
+                                        <input type="checkbox" id="gp-custom-prompt">
+                                        <span class="gp-toggle-track"></span>
+                                    </label>
+                                </div>
+                                <textarea class="gp-textarea" id="gp-custom-prompt-text" placeholder="Additional instructions for AI..." hidden style="width:100%;margin-top:6px;padding:10px;border:1px solid var(--border);border-radius:6px;font-size:12px;resize:vertical;min-height:60px"></textarea>
+
+                                <div class="gp-toggle-row">
+                                    <div class="gp-toggle-info">
+                                        <label class="gp-toggle-label" for="gp-prohibited">Prohibited Words</label>
+                                        <span class="gp-toggle-hint">Words to exclude from keywords</span>
+                                    </div>
+                                    <label class="gp-toggle">
+                                        <input type="checkbox" id="gp-prohibited">
+                                        <span class="gp-toggle-track"></span>
+                                    </label>
+                                </div>
+                                <textarea class="gp-textarea" id="gp-prohibited-text" placeholder="word1, word2, word3" hidden style="width:100%;margin-top:6px;padding:10px;border:1px solid var(--border);border-radius:6px;font-size:12px;resize:vertical;min-height:60px"></textarea>
+
+                                <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding-top:12px;border-top:1px solid var(--border)">
+                                    <button class="gp-btn-reset" id="gp-meta-reset-btn" type="button" style="background:none;border:none;color:var(--primary);font-size:12px;font-weight:600;cursor:pointer">Reset to Default</button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- RIGHT PANEL: Upload + Output -->
+                    <div class="gp-output-panel">
+
+                        <div class="gp-card">
+                            <div class="gp-card-header">
+                                <div>
+                                    <div class="gp-card-title">
+                                        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                                        Upload Files
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="gp-upload-zone" id="gp-dropzone">
+                                <input type="file" id="gp-file-input" accept=".jpg,.jpeg,.png,.webp,.eps,.svg,.ai,image/*" multiple hidden>
+                                <div class="gp-upload-icon">
+                                    <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                                </div>
+                                <h3 class="gp-upload-title">Drag & drop files here, or <span class="gp-gradient-text">browse</span></h3>
+                                <p class="gp-upload-subtitle">Supports image, video, SVG, EPS & AI &#183; Max 500 files</p>
+                                <div class="gp-upload-formats">
+                                    <span class="gp-format-badge">Images</span>
+                                    <span class="gp-format-badge">Videos</span>
+                                    <span class="gp-format-badge">SVG</span>
+                                    <span class="gp-format-badge">EPS & AI</span>
+                                </div>
+                                <div class="gp-samples">
+                                    <div class="gp-samples-title">Quick Demo Artworks</div>
+                                    <div class="gp-samples-grid">
+                                        <button class="gp-sample-btn" data-sample="botanical" type="button">Tropical Botanical</button>
+                                        <button class="gp-sample-btn" data-sample="cloud-ai" type="button">Isometric Cloud AI</button>
+                                        <button class="gp-sample-btn" data-sample="business" type="button">Business Team</button>
+                                        <button class="gp-sample-btn" data-sample="coffee" type="button">Vintage Coffee</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="gp-card gp-api-warning">
+                            <div class="gp-card-header" style="margin-bottom:0">
+                                <div style="display:flex;align-items:center;gap:10px">
+                                    <div style="width:36px;height:36px;border-radius:8px;background:rgba(232,160,76,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                                        <svg viewBox="0 0 24 24" style="width:18px;height:18px;color:var(--accent,#E8A04C)" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                    </div>
+                                    <div>
+                                        <div style="font-size:14px;font-weight:600;color:var(--accent,#E8A04C)">API Key Required</div>
+                                        <div style="font-size:12px;color:var(--text-secondary);line-height:1.5">Please add at least one Google Gemini API key to enable generation. We use your own keys for maximum security and to completely prevent shared rate-limits.</div>
+                                    </div>
+                                </div>
+                                <button class="gp-btn-add-key" type="button">Add API Key</button>
+                            </div>
+                        </div>
+
+                        <div class="gp-card">
+                            <div class="gp-empty-state">
+                                <div class="gp-empty-icon">
+                                    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                                </div>
+                                <h3>Your generated results will appear here</h3>
+                                <p>Upload some files and click "Generate All" to get started.</p>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="gp-progress" id="gp-progress" style="display:none">
+                <div class="gp-progress-track"><div class="gp-progress-fill" id="gp-progress-fill"></div></div>
+                <div class="gp-progress-text" id="gp-progress-text"></div>
+            </div>
+
+            <div class="gp-rate-limit" id="gp-rate-limit" style="display:none">
+                Rate limit reached. Waiting before retrying...
+            </div>
+
+            <div id="gp-detail-view" style="display:none"></div>
+            <div id="gp-batch-view" style="display:none"></div>
+            <div id="gp-prompt-view" style="display:none"></div>
+        </div>
+    </div>
+</div>
+
+<div class="gp-toast-container" id="gp-toast-container"></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var toggle = document.getElementById('gp-settings-toggle');
+    var content = document.getElementById('gp-settings-content');
+    var arrow = toggle ? toggle.querySelector('svg:last-child') : null;
+    if (toggle && content) {
+        toggle.addEventListener('click', function() {
+            var hidden = content.style.display === 'none';
+            content.style.display = hidden ? '' : 'none';
+            if (arrow) arrow.style.transform = hidden ? 'rotate(180deg)' : '';
+        });
+    }
+
+    var platformPills = document.querySelectorAll('.gp-platform-pill');
+    platformPills.forEach(function(pill) {
+        pill.addEventListener('click', function() {
+            platformPills.forEach(function(p) { p.classList.remove('active'); });
+            pill.classList.add('active');
+        });
+    });
+});
+</script>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/tool-common.js' %}"></script>
+<script src="{% static 'js/golap-metadata-services.js' %}"></script>
+<script src="{% static 'js/golap-metadata-ui.js' %}"></script>
+<script src="{% static 'js/golap-metadata.js' %}"></script>
+{% endblock %}
