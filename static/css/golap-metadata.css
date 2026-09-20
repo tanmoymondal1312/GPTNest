@@ -1938,3 +1938,222 @@
         position: static;
     }
 }
+
+/* ============================================
+   Onboarding - API Key Gate
+   ============================================ */
+
+.gp-onboarding {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: #08090b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+.gp-onboarding-card {
+    width: 100%;
+    max-width: 480px;
+    text-align: center;
+}
+
+.gp-onboarding-logo {
+    color: #d4a052;
+    margin-bottom: 28px;
+}
+
+.gp-onboarding-title {
+    font-size: 28px;
+    font-weight: 800;
+    color: #f0f0f2;
+    letter-spacing: -0.03em;
+    margin-bottom: 12px;
+}
+
+.gp-onboarding-desc {
+    font-size: 15px;
+    color: #7a7c83;
+    line-height: 1.65;
+    margin-bottom: 36px;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.gp-onboarding-form {
+    background: #111216;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 36px;
+}
+
+.gp-onboarding-field {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.gp-onboarding-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #7a7c83;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+}
+
+.gp-onboarding-input-row {
+    position: relative;
+}
+
+.gp-onboarding-input {
+    width: 100%;
+    padding: 12px 48px 12px 14px;
+    background: #0c0d10;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    color: #f0f0f2;
+    font-size: 14px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.gp-onboarding-input::placeholder {
+    color: #52545a;
+    font-family: inherit;
+}
+
+.gp-onboarding-input:focus {
+    border-color: rgba(212, 160, 82, 0.4);
+}
+
+.gp-onboarding-eye-btn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #52545a;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.15s ease;
+}
+
+.gp-onboarding-eye-btn:hover {
+    color: #7a7c83;
+}
+
+.gp-onboarding-hint {
+    display: none;
+    font-size: 12px;
+    color: #ef4444;
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: 8px;
+}
+
+.gp-onboarding-submit {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 13px 24px;
+    background: linear-gradient(135deg, #d4a052, #c4923f);
+    color: #0a0b0d;
+    font-size: 14px;
+    font-weight: 700;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.gp-onboarding-submit:hover {
+    background: linear-gradient(135deg, #e4bc78, #d4a052);
+    box-shadow: 0 4px 20px rgba(212, 160, 82, 0.25);
+    transform: translateY(-1px);
+}
+
+.gp-onboarding-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    text-align: left;
+}
+
+.gp-onboarding-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px 16px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    border-radius: 12px;
+}
+
+.gp-onboarding-step-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: rgba(212, 160, 82, 0.1);
+    border: 1px solid rgba(212, 160, 82, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: #d4a052;
+    flex-shrink: 0;
+}
+
+.gp-onboarding-step strong {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #f0f0f2;
+    margin-bottom: 2px;
+}
+
+.gp-onboarding-step span {
+    font-size: 12px;
+    color: #7a7c83;
+    line-height: 1.5;
+}
+
+.gp-onboarding-step span a {
+    color: #d4a052;
+    text-decoration: underline;
+    text-decoration-color: rgba(212, 160, 82, 0.3);
+    transition: text-decoration-color 0.15s ease;
+}
+
+.gp-onboarding-step span a:hover {
+    text-decoration-color: #d4a052;
+}
+
+@media (max-width: 480px) {
+    .gp-onboarding-title {
+        font-size: 22px;
+    }
+    .gp-onboarding-desc {
+        font-size: 14px;
+    }
+    .gp-onboarding-form {
+        padding: 20px;
+    }
+}
