@@ -248,13 +248,18 @@
 }
 
 .gp-field-btn.primary {
-    background: rgba(255, 255, 255, 0.08);
-    color: var(--text-primary);
-    border-color: rgba(255, 255, 255, 0.10);
+    background: linear-gradient(135deg, #E8A04C, #D4873A);
+    color: #fff;
+    border-color: #E8A04C;
+    font-weight: 700;
+    box-shadow: 0 2px 12px rgba(232, 160, 76, 0.35);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .gp-field-btn.primary:hover {
-    background: rgba(255, 255, 255, 0.12);
+    background: linear-gradient(135deg, #f0b060, #E8A04C);
+    box-shadow: 0 4px 20px rgba(232, 160, 76, 0.5);
+    transform: translateY(-1px);
 }
 
 /* Keywords */
@@ -423,6 +428,18 @@
     display: flex;
     gap: 6px;
     flex-wrap: wrap;
+    align-items: center;
+}
+
+.gp-batch-actions .gp-field-btn.primary {
+    animation: generatePulse 2s ease-in-out infinite;
+    position: relative;
+    z-index: 1;
+}
+
+@keyframes generatePulse {
+    0%, 100% { box-shadow: 0 2px 12px rgba(232, 160, 76, 0.35); }
+    50% { box-shadow: 0 2px 24px rgba(232, 160, 76, 0.6); }
 }
 
 .gp-table {
