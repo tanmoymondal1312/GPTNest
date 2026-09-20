@@ -482,3 +482,84 @@ def check_models(request):
             })
 
     return JsonResponse({'models': results})
+
+
+@csrf_exempt
+@login_required
+def api_keys_list(request):
+    if request.method != 'GET':
+        return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+    keys = request.session.get('gemini_api_keys', [])
+    masked = []
+    for k in keys:
+        masked.append({
+            'id': k[:8] + '...' + k[-4:] if len(k) > 12 else '***',
+            'key': k,
+        })
+    return JsonResponse({'keys': masked, 'count': len(keys)})
+
+
+@csrf_exempt
+@login_required
+def api_keys_add(request):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+    try:
+        body = json.loads(request.body)
+    except (json.JSONDecodeError, ValueError):
+        return JsonResponse({'error': 'Invalid JSON body'}, status=400)
+
+    key = body.get('key', '').strip()
+    if not key:
+        return JsonResponse({'error': 'API key is required.'}, status=400)
+
+    if len(key) < 20:
+        return JsonResponse({'error': 'Invalid API key format.'}, status=400)
+
+    keys = request.session.get('gemini_api_keys', [])
+    if key in keys:
+        return JsonResponse({'error': 'This key is already added.'}, status=400)
+
+    keys.append(key)
+    request.session['gemini_api_keys'] = keys
+    request.session.modified = True
+
+    return JsonResponse({'success': True, 'count': len(keys)})
+
+
+@csrf_exempt
+@login_required
+def api_keys_delete(request):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+    try:
+        body = json.loads(request.body)
+    except (json.JSONDecodeError, ValueError):
+        return JsonResponse({'error': 'Invalid JSON body'}, status=400)
+
+    key = body.get('key', '').strip()
+    if not key:
+        return JsonResponse({'error': 'API key is required.'}, status=400)
+
+    keys = request.session.get('gemini_api_keys', [])
+    if key in keys:
+        keys.remove(key)
+        request.session['gemini_api_keys'] = keys
+        request.session.modified = True
+
+    return JsonResponse({'success': True, 'count': len(keys)})
+
+
+@csrf_exempt
+@login_required
+def api_keys_get_first(request):
+    if request.method != 'GET':
+        return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+    keys = request.session.get('gemini_api_keys', [])
+    if keys:
+        return JsonResponse({'key': keys[0], 'has_key': True})
+    return JsonResponse({'key': None, 'has_key': False})

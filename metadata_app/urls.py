@@ -10,4 +10,8 @@ urlpatterns = [
     path('api/image-to-prompt/', views.image_to_prompt, name='image_to_prompt'),
     path('api/render-eps/', views.render_eps, name='render_eps'),
     path('api/check-models/', views.check_models, name='check_models'),
+    path('api/keys/', views.api_keys_list, name='api_keys_list'),
+    path('api/keys/add/', views.api_keys_add, name='api_keys_add'),
+    path('api/keys/delete/', views.api_keys_delete, name='api_keys_delete'),
+    path('api/keys/first/', views.api_keys_get_first, name='api_keys_get_first'),
 ]

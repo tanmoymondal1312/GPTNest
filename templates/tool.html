@@ -8,74 +8,7 @@
 {% endblock %}
 
 {% block content %}
-
-<!-- API Key Onboarding Gate -->
-<div class="gp-onboarding" id="gp-onboarding">
-    <div class="gp-onboarding-card">
-        <div class="gp-onboarding-logo">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" width="48" height="48">
-                <path d="M32 4 C32 4 36 14 36 20 C36 26 33.5 28 32 28 C30.5 28 28 26 28 20 C28 14 32 4 32 4Z" fill="currentColor"/>
-                <path d="M32 60 C32 60 28 50 28 44 C28 38 30.5 36 32 36 C33.5 36 36 38 36 44 C36 50 32 60 32 60Z" fill="currentColor"/>
-                <path d="M4 32 C4 32 14 28 20 28 C26 28 28 30.5 28 32 C28 33.5 26 36 20 36 C14 36 4 32 4 32Z" fill="currentColor"/>
-                <path d="M60 32 C60 32 50 36 44 36 C38 36 36 33.5 36 32 C36 30.5 38 28 44 28 C50 28 60 32 60 32Z" fill="currentColor"/>
-                <path d="M11.5 11.5 C11.5 11.5 17 15 21 17.5 C25 20 26.5 22 26.5 23.5 C26.5 25 25 25.5 23 24.5 C21 23.5 17 20 11.5 11.5Z" fill="currentColor"/>
-                <path d="M52.5 52.5 C52.5 52.5 47 49 43 46.5 C39 44 37.5 42 37.5 40.5 C37.5 39 39 38.5 41 39.5 C43 40.5 47 44 52.5 52.5Z" fill="currentColor"/>
-                <path d="M52.5 11.5 C52.5 11.5 47 15 43 17.5 C39 20 37.5 22 37.5 23.5 C37.5 25 39 25.5 41 24.5 C43 23.5 47 20 52.5 11.5Z" fill="currentColor"/>
-                <path d="M11.5 52.5 C11.5 52.5 17 49 21 46.5 C25 44 26.5 42 26.5 40.5 C26.5 39 25 38.5 23 39.5 C21 40.5 17 44 11.5 52.5Z" fill="currentColor"/>
-                <circle cx="32" cy="32" r="4.5" fill="currentColor"/>
-            </svg>
-        </div>
-        <h1 class="gp-onboarding-title">Welcome to Csvgpt</h1>
-        <p class="gp-onboarding-desc">Add your Google Gemini API key to start generating metadata. Your key stays in your browser and is never sent to our servers.</p>
-
-        <div class="gp-onboarding-form">
-            <div class="gp-onboarding-field">
-                <label class="gp-onboarding-label">
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg>
-                    API KEY
-                </label>
-                <div class="gp-onboarding-input-row">
-                    <input type="password" class="gp-onboarding-input" placeholder="Enter your Gemini API key" id="gp-onboarding-key-input" autocomplete="off">
-                    <button class="gp-onboarding-eye-btn" id="gp-onboarding-eye-btn" type="button" tabindex="-1">
-                        <svg class="gp-eye-open" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                        <svg class="gp-eye-closed" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
-                    </button>
-                </div>
-                <div class="gp-onboarding-hint" id="gp-onboarding-error"></div>
-            </div>
-            <button class="gp-onboarding-submit" id="gp-onboarding-submit" type="button">
-                Continue
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-            </button>
-        </div>
-
-        <div class="gp-onboarding-steps">
-            <div class="gp-onboarding-step">
-                <div class="gp-onboarding-step-num">1</div>
-                <div>
-                    <strong>Get a free API key</strong>
-                    <span>Visit <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio</a> to create one</span>
-                </div>
-            </div>
-            <div class="gp-onboarding-step">
-                <div class="gp-onboarding-step-num">2</div>
-                <div>
-                    <strong>Paste your key above</strong>
-                    <span>Keys are stored locally in your browser only</span>
-                </div>
-            </div>
-            <div class="gp-onboarding-step">
-                <div class="gp-onboarding-step-num">3</div>
-                <div>
-                    <strong>Start generating</strong>
-                    <span>Upload images and get AI-powered metadata</span>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="gp-app" id="gp-app" style="display:none">
+<div class="gp-app" id="gp-app">
     <div class="gp-sidebar-overlay" id="gp-sidebar-overlay"></div>
 
     <aside class="gp-sidebar" id="gp-sidebar">
@@ -424,7 +357,7 @@
                                         <div style="font-size:12px;color:var(--text-secondary);line-height:1.5">Please add at least one Google Gemini API key to enable generation. We use your own keys for maximum security and to completely prevent shared rate-limits.</div>
                                     </div>
                                 </div>
-                                <button class="gp-btn-add-key" type="button" onclick="document.getElementById('gp-api-modal-overlay').style.display='flex'">Add API Key</button>
+                                <button class="gp-btn-add-key" type="button">Add API Key</button>
                             </div>
                         </div>
 
@@ -548,76 +481,6 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    var apiKeys = JSON.parse(localStorage.getItem('gp_api_keys') || '{}');
-    var geminiKeys = apiKeys['gemini'] || [];
-
-    var onboarding = document.getElementById('gp-onboarding');
-    var app = document.getElementById('gp-app');
-
-    if (geminiKeys.length > 0) {
-        onboarding.style.display = 'none';
-        app.style.display = '';
-    }
-
-    var onboardingInput = document.getElementById('gp-onboarding-key-input');
-    var onboardingSubmit = document.getElementById('gp-onboarding-submit');
-    var onboardingError = document.getElementById('gp-onboarding-error');
-    var onboardingEye = document.getElementById('gp-onboarding-eye-btn');
-
-    if (onboardingEye && onboardingInput) {
-        onboardingEye.addEventListener('click', function() {
-            var eyeOpen = onboardingEye.querySelector('.gp-eye-open');
-            var eyeClosed = onboardingEye.querySelector('.gp-eye-closed');
-            if (onboardingInput.type === 'password') {
-                onboardingInput.type = 'text';
-                eyeOpen.style.display = 'none';
-                eyeClosed.style.display = 'block';
-            } else {
-                onboardingInput.type = 'password';
-                eyeOpen.style.display = 'block';
-                eyeClosed.style.display = 'none';
-            }
-        });
-    }
-
-    function showOnboardingError(msg) {
-        if (onboardingError) {
-            onboardingError.textContent = msg;
-            onboardingError.style.display = 'block';
-        }
-    }
-
-    function clearOnboardingError() {
-        if (onboardingError) {
-            onboardingError.textContent = '';
-            onboardingError.style.display = 'none';
-        }
-    }
-
-    if (onboardingSubmit && onboardingInput) {
-        onboardingSubmit.addEventListener('click', function() {
-            clearOnboardingError();
-            var val = onboardingInput.value.trim();
-            if (!val) {
-                showOnboardingError('Please enter a valid API key.');
-                return;
-            }
-            if (val.length < 20) {
-                showOnboardingError('This doesn\'t look like a valid API key. Please check and try again.');
-                return;
-            }
-            if (!apiKeys['gemini']) apiKeys['gemini'] = [];
-            apiKeys['gemini'].push(val);
-            localStorage.setItem('gp_api_keys', JSON.stringify(apiKeys));
-            onboarding.style.display = 'none';
-            app.style.display = '';
-        });
-
-        onboardingInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') onboardingSubmit.click();
-        });
-    }
-
     var toggle = document.getElementById('gp-settings-toggle');
     var content = document.getElementById('gp-settings-content');
     var arrow = toggle ? toggle.querySelector('svg:last-child') : null;
@@ -641,8 +504,15 @@ document.addEventListener('DOMContentLoaded', function() {
     var apiModalClose = document.getElementById('gp-api-modal-close');
     var apiModalDone = document.getElementById('gp-api-modal-done');
     var apiSettingsBtn = document.getElementById('gp-api-settings-btn');
+    var apiKeyAdd = document.getElementById('gp-api-key-add');
+    var apiKeyInput = document.getElementById('gp-api-key-input');
+    var storedKeysCount = document.getElementById('gp-stored-keys-count');
+    var storedKeysList = document.getElementById('gp-stored-keys-list');
 
-    function openApiModal() { if (apiModalOverlay) apiModalOverlay.style.display = 'flex'; }
+    function openApiModal() {
+        if (apiModalOverlay) apiModalOverlay.style.display = 'flex';
+        loadKeys();
+    }
     function closeApiModal() { if (apiModalOverlay) apiModalOverlay.style.display = 'none'; }
 
     if (apiSettingsBtn) apiSettingsBtn.addEventListener('click', openApiModal);
@@ -658,45 +528,60 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    var apiKeyAdd = document.getElementById('gp-api-key-add');
-    var apiKeyInput = document.getElementById('gp-api-key-input');
-    var storedKeysCount = document.getElementById('gp-stored-keys-count');
-    var storedKeysList = document.getElementById('gp-stored-keys-list');
+    function getCookie(name) {
+        var v = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+        return v ? v.pop() : '';
+    }
 
-    function renderStoredKeys() {
-        var keys = apiKeys['gemini'] || [];
-        if (storedKeysCount) storedKeysCount.textContent = keys.length;
-        if (!storedKeysList) return;
-        if (keys.length === 0) {
-            storedKeysList.innerHTML = '<div class="gp-modal-empty"><svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg><div class="gp-modal-empty-title">No keys stored yet</div><div class="gp-modal-empty-desc">Add your Google Gemini API key above to get started</div></div>';
-        } else {
-            storedKeysList.innerHTML = keys.map(function(k, i) {
-                var masked = k.substring(0, 8) + '...' + k.substring(k.length - 4);
-                return '<div class="gp-modal-key-item"><span class="gp-modal-key-text">' + masked + '</span><button class="gp-modal-key-remove" data-idx="' + i + '" type="button">&times;</button></div>';
-            }).join('');
-            storedKeysList.querySelectorAll('.gp-modal-key-remove').forEach(function(btn) {
-                btn.addEventListener('click', function() {
-                    keys.splice(parseInt(btn.dataset.idx), 1);
-                    apiKeys['gemini'] = keys;
-                    localStorage.setItem('gp_api_keys', JSON.stringify(apiKeys));
-                    renderStoredKeys();
-                });
-            });
-        }
+    function loadKeys() {
+        fetch('/api/keys/', { credentials: 'same-origin' })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                var keys = data.keys || [];
+                if (storedKeysCount) storedKeysCount.textContent = data.count || 0;
+                if (!storedKeysList) return;
+                if (keys.length === 0) {
+                    storedKeysList.innerHTML = '<div class="gp-modal-empty"><svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg><div class="gp-modal-empty-title">No keys stored yet</div><div class="gp-modal-empty-desc">Add your Google Gemini API key above to get started</div></div>';
+                } else {
+                    storedKeysList.innerHTML = keys.map(function(k) {
+                        return '<div class="gp-modal-key-item"><span class="gp-modal-key-text">' + k.id + '</span><button class="gp-modal-key-remove" data-key="' + k.key + '" type="button">&times;</button></div>';
+                    }).join('');
+                    storedKeysList.querySelectorAll('.gp-modal-key-remove').forEach(function(btn) {
+                        btn.addEventListener('click', function() {
+                            var keyToDelete = btn.dataset.key;
+                            fetch('/api/keys/delete/', {
+                                method: 'POST',
+                                credentials: 'same-origin',
+                                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+                                body: JSON.stringify({ key: keyToDelete })
+                            }).then(function() { loadKeys(); });
+                        });
+                    });
+                }
+            }).catch(function() {});
     }
 
     if (apiKeyAdd && apiKeyInput) {
         apiKeyAdd.addEventListener('click', function() {
             var val = apiKeyInput.value.trim();
             if (!val) return;
-            if (!apiKeys['gemini']) apiKeys['gemini'] = [];
-            apiKeys['gemini'].push(val);
-            localStorage.setItem('gp_api_keys', JSON.stringify(apiKeys));
-            apiKeyInput.value = '';
-            renderStoredKeys();
+            fetch('/api/keys/add/', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+                body: JSON.stringify({ key: val })
+            }).then(function(r) { return r.json(); }).then(function(data) {
+                if (data.success) {
+                    apiKeyInput.value = '';
+                    loadKeys();
+                } else if (data.error) {
+                    alert(data.error);
+                }
+            }).catch(function() {});
         });
     }
-    renderStoredKeys();
+
+    loadKeys();
 });
 </script>
 {% endblock %}
