@@ -1938,3 +1938,55 @@
         position: static;
     }
 }
+
+/* ============================================
+   Sun Icon Rotating Gradient Glow
+   ============================================ */
+
+.gp-sun-wrapper {
+    position: relative;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.gp-sun-icon {
+    position: relative;
+    z-index: 2;
+    color: var(--primary, #d4a052);
+    filter: drop-shadow(0 0 8px rgba(212, 160, 82, 0.4));
+}
+
+.gp-sun-glow {
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    background: conic-gradient(
+        from 0deg,
+        #a855f7,
+        #6366f1,
+        #06b6d4,
+        #22c55e,
+        #a855f7
+    );
+    opacity: 0.7;
+    filter: blur(6px);
+    animation: gp-sun-spin 4s linear infinite;
+}
+
+@keyframes gp-sun-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.gp-theme-selector:hover .gp-sun-glow {
+    opacity: 1;
+    filter: blur(8px);
+}
+
+.gp-theme-selector:hover .gp-sun-icon {
+    filter: drop-shadow(0 0 12px rgba(212, 160, 82, 0.6));
+}
