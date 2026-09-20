@@ -14,4 +14,6 @@ urlpatterns = [
     path('api/keys/add/', views.api_keys_add, name='api_keys_add'),
     path('api/keys/delete/', views.api_keys_delete, name='api_keys_delete'),
     path('api/keys/first/', views.api_keys_get_first, name='api_keys_get_first'),
+    path('api/settings/', views.api_settings_get, name='api_settings_get'),
+    path('api/settings/save/', views.api_settings_save, name='api_settings_save'),
 ]

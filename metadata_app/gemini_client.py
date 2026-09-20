@@ -12,10 +12,11 @@ BACKOFF_DELAYS = [2000, 4000]
 _visual_analysis_cache = {}
 
 
-def get_gemini_client():
-    api_key = os.environ.get('GEMINI_API_KEY')
+def get_gemini_client(api_key=None):
     if not api_key:
-        raise ValueError('GEMINI_API_KEY environment variable is not configured.')
+        api_key = os.environ.get('GEMINI_API_KEY')
+    if not api_key:
+        raise ValueError('No API key configured. Please add your Gemini API key in Settings.')
     try:
         from google import genai
         client = genai.Client(

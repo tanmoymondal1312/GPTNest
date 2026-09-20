@@ -282,15 +282,17 @@ async def analyze_metadata(request):
     platform = body.get('platform', 'adobe-stock')
     settings = body.get('settings', {})
     file_hash = body.get('fileHash', '')
-    requested_model = body.get('model', '')
+    requested_model = body.get('model', '') or request.session.get('selected_model', '')
 
     cached, cache_key = get_cached_analysis(file_hash, image)
     if cached:
         logger.info(f'[AI Vision Cache Hit] Reusing visual analysis for {file_name or "artwork"}')
         return JsonResponse(cached)
 
+    api_key = body.get('apiKey') or (request.session.get('gemini_api_keys', [None])[0] if request.session.get('gemini_api_keys') else None)
+
     try:
-        client = get_gemini_client()
+        client = get_gemini_client(api_key)
     except ValueError as e:
         return JsonResponse({'error': str(e)}, status=500)
 
@@ -370,8 +372,10 @@ async def image_to_prompt(request):
     mime_type = body.get('mimeType', 'image/png')
     file_name = body.get('fileName', 'artwork')
 
+    api_key = body.get('apiKey') or (request.session.get('gemini_api_keys', [None])[0] if request.session.get('gemini_api_keys') else None)
+
     try:
-        client = get_gemini_client()
+        client = get_gemini_client(api_key)
     except ValueError as e:
         return JsonResponse({'error': str(e)}, status=500)
 
@@ -445,9 +449,11 @@ def check_models(request):
     from .gemini_client import GEMINI_MODELS
     import time
 
+    api_key = request.session.get('gemini_api_keys', [None])[0] if request.session.get('gemini_api_keys') else None
+
     results = []
     try:
-        client = get_gemini_client()
+        client = get_gemini_client(api_key)
     except ValueError as e:
         return JsonResponse({'error': str(e)}, status=500)
 
@@ -563,3 +569,34 @@ def api_keys_get_first(request):
     if keys:
         return JsonResponse({'key': keys[0], 'has_key': True})
     return JsonResponse({'key': None, 'has_key': False})
+
+
+@csrf_exempt
+@login_required
+def api_settings_get(request):
+    if request.method != 'GET':
+        return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+    return JsonResponse({
+        'model': request.session.get('selected_model', ''),
+        'has_keys': len(request.session.get('gemini_api_keys', [])) > 0,
+    })
+
+
+@csrf_exempt
+@login_required
+def api_settings_save(request):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+    try:
+        body = json.loads(request.body)
+    except (json.JSONDecodeError, ValueError):
+        return JsonResponse({'error': 'Invalid JSON body'}, status=400)
+
+    model = body.get('model', '')
+    if model:
+        request.session['selected_model'] = model
+        request.session.modified = True
+
+    return JsonResponse({'success': True})
