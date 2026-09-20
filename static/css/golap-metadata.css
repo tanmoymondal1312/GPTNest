@@ -863,7 +863,7 @@
 .gp-brand-icon {
     width: 34px;
     height: 34px;
-    background: linear-gradient(135deg, #E8A04C, #D4873A);
+    background: transparent;
     border-radius: 10px;
     display: flex;
     align-items: center;
