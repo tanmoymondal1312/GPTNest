@@ -1957,29 +1957,27 @@
 }
 
 /* ============================================
-   Sun Icon Rotating Gradient Glow
+   Brand Icon Rotating Gradient Glow
    ============================================ */
 
-.gp-sun-wrapper {
+.gp-brand-icon {
     position: relative;
-    width: 44px;
-    height: 44px;
+    width: 36px;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
 }
 
-.gp-sun-icon {
+.gp-brand-icon svg {
     position: relative;
     z-index: 2;
-    color: var(--primary, #d4a052);
-    filter: drop-shadow(0 0 8px rgba(212, 160, 82, 0.4));
 }
 
-.gp-sun-glow {
+.gp-brand-glow {
     position: absolute;
-    inset: -4px;
+    inset: -6px;
     border-radius: 50%;
     background: conic-gradient(
         from 0deg,
@@ -1989,21 +1987,17 @@
         #22c55e,
         #a855f7
     );
-    opacity: 0.7;
-    filter: blur(6px);
-    animation: gp-sun-spin 4s linear infinite;
+    opacity: 0.65;
+    filter: blur(7px);
+    animation: gp-brand-spin 4s linear infinite;
 }
 
-@keyframes gp-sun-spin {
+@keyframes gp-brand-spin {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
 }
 
-.gp-theme-selector:hover .gp-sun-glow {
+.gp-sidebar-brand:hover .gp-brand-glow {
     opacity: 1;
-    filter: blur(8px);
-}
-
-.gp-theme-selector:hover .gp-sun-icon {
-    filter: drop-shadow(0 0 12px rgba(212, 160, 82, 0.6));
+    filter: blur(9px);
 }
