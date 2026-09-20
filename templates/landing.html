@@ -1,0 +1,375 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Csvgpt - AI Stock Metadata Generator{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/landing.css' %}">{% endblock %}
+
+{% block content %}
+<nav class="cvg-nav">
+  <div class="cvg-nav-inner">
+    <a href="{% url 'landing' %}" class="cvg-nav-brand">
+      <svg class="cvg-nav-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+        <path d="M32 4 C32 4 36 14 36 20 C36 26 33.5 28 32 28 C30.5 28 28 26 28 20 C28 14 32 4 32 4Z" fill="currentColor"/>
+        <path d="M32 60 C32 60 28 50 28 44 C28 38 30.5 36 32 36 C33.5 36 36 38 36 44 C36 50 32 60 32 60Z" fill="currentColor"/>
+        <path d="M4 32 C4 32 14 28 20 28 C26 28 28 30.5 28 32 C28 33.5 26 36 20 36 C14 36 4 32 4 32Z" fill="currentColor"/>
+        <path d="M60 32 C60 32 50 36 44 36 C38 36 36 33.5 36 32 C36 30.5 38 28 44 28 C50 28 60 32 60 32Z" fill="currentColor"/>
+        <path d="M11.5 11.5 C11.5 11.5 17 15 21 17.5 C25 20 26.5 22 26.5 23.5 C26.5 25 25 25.5 23 24.5 C21 23.5 17 20 11.5 11.5Z" fill="currentColor"/>
+        <path d="M52.5 52.5 C52.5 52.5 47 49 43 46.5 C39 44 37.5 42 37.5 40.5 C37.5 39 39 38.5 41 39.5 C43 40.5 47 44 52.5 52.5Z" fill="currentColor"/>
+        <path d="M52.5 11.5 C52.5 11.5 47 15 43 17.5 C39 20 37.5 22 37.5 23.5 C37.5 25 39 25.5 41 24.5 C43 23.5 47 20 52.5 11.5Z" fill="currentColor"/>
+        <path d="M11.5 52.5 C11.5 52.5 17 49 21 46.5 C25 44 26.5 42 26.5 40.5 C26.5 39 25 38.5 23 39.5 C21 40.5 17 44 11.5 52.5Z" fill="currentColor"/>
+        <circle cx="32" cy="32" r="4.5" fill="currentColor"/>
+      </svg>
+      <span class="cvg-nav-wordmark">Csvgpt</span>
+    </a>
+
+    <div class="cvg-nav-links">
+      <a href="#features">Features</a>
+      <a href="#how-it-works">How it works</a>
+      <a href="#testimonials">Testimonials</a>
+      <a href="#pricing">Pricing</a>
+    </div>
+
+    <div class="cvg-nav-actions">
+      <a href="{% url 'login_page' %}" class="cvg-btn cvg-btn-ghost">Login</a>
+      <a href="{% url 'login_page' %}?mode=signup" class="cvg-btn cvg-btn-primary">Get Started</a>
+    </div>
+
+    <button class="cvg-nav-mobile-toggle" aria-label="Menu">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="cvg-hero">
+  <div class="cvg-hero-glow"></div>
+  <div class="cvg-hero-inner">
+    <div class="cvg-hero-text">
+      <span class="cvg-hero-badge">AI-powered stock metadata generation</span>
+      <h1 class="cvg-hero-title">
+        Adobe Stock Tracker &amp;<br>
+        <span class="cvg-gradient-text">Metadata Generator</span>
+      </h1>
+      <p class="cvg-hero-desc">
+        Generate SEO-optimized titles, descriptions, and keywords for your microstock artwork in seconds. Powered by Google Gemini Vision AI with anti-hallucination safeguards.
+      </p>
+      <div class="cvg-hero-btns">
+        <a href="{% url 'login_page' %}?mode=signup" class="cvg-btn cvg-btn-primary cvg-btn-lg">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          Get Started Free
+        </a>
+        <a href="#features" class="cvg-btn cvg-btn-outline cvg-btn-lg">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+          Chrome Extension
+        </a>
+      </div>
+      <div class="cvg-hero-stats">
+        <div class="cvg-stat"><strong>49+</strong><span>Keywords</span></div>
+        <div class="cvg-stat-divider"></div>
+        <div class="cvg-stat"><strong>7</strong><span>Platforms</span></div>
+        <div class="cvg-stat-divider"></div>
+        <div class="cvg-stat"><strong>&lt;3s</strong><span>Generation</span></div>
+      </div>
+    </div>
+    <div class="cvg-hero-visual">
+      <div class="cvg-preview-card">
+        <div class="cvg-preview-header">
+          <span class="cvg-preview-dot cvg-dot-red"></span>
+          <span class="cvg-preview-dot cvg-dot-yellow"></span>
+          <span class="cvg-preview-dot cvg-dot-green"></span>
+          <span class="cvg-preview-title">Generated Metadata</span>
+        </div>
+        <div class="cvg-preview-body">
+          <div class="cvg-preview-field">
+            <label>Title</label>
+            <div class="cvg-preview-value">Red Apple Isolated on White Background</div>
+          </div>
+          <div class="cvg-preview-field">
+            <label>Keywords</label>
+            <div class="cvg-preview-tags">
+              <span class="cvg-tag cvg-tag-top">apple</span>
+              <span class="cvg-tag cvg-tag-top">red</span>
+              <span class="cvg-tag cvg-tag-top">fruit</span>
+              <span class="cvg-tag">fresh</span>
+              <span class="cvg-tag">food</span>
+              <span class="cvg-tag">organic</span>
+              <span class="cvg-tag">healthy</span>
+              <span class="cvg-tag">+42</span>
+            </div>
+          </div>
+          <div class="cvg-preview-field">
+            <label>Category</label>
+            <div class="cvg-preview-value cvg-muted">Food &amp; Drink &gt; Fruits</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features -->
+<section id="features" class="cvg-section">
+  <div class="cvg-section-inner">
+    <span class="cvg-section-label">Features</span>
+    <h2 class="cvg-section-title">Everything you need for microstock success</h2>
+    <p class="cvg-section-desc">Powerful AI tools designed to streamline your stock content workflow from upload to publish.</p>
+
+    <div class="cvg-features-grid">
+      <div class="cvg-feature-card">
+        <div class="cvg-feature-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a5 5 0 0 1 5 5v3a5 5 0 0 1-10 0V7a5 5 0 0 1 5-5Z"/><path d="M9.5 14.5 3 21"/><path d="M14.5 14.5 21 21"/><circle cx="12" cy="7" r="1" fill="currentColor" stroke="none"/></svg>
+        </div>
+        <h3>AI Metadata Generation</h3>
+        <p>Gemini Vision analyzes every pixel to produce accurate, searchable titles, descriptions, and relevance-ranked keywords with zero hallucination.</p>
+      </div>
+
+      <div class="cvg-feature-card">
+        <div class="cvg-feature-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        </div>
+        <h3>Batch Processing</h3>
+        <p>Upload and process multiple artworks simultaneously. Generate metadata for your entire portfolio in one session with consistent quality.</p>
+      </div>
+
+      <div class="cvg-feature-card">
+        <div class="cvg-feature-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+        </div>
+        <h3>Multi-Platform Export</h3>
+        <p>One-click export optimized for Adobe Stock, Shutterstock, iStock, Freepik, Dreamstime, 123RF, and Depositphotos with platform-specific formatting.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- How it Works -->
+<section id="how-it-works" class="cvg-section cvg-section-alt">
+  <div class="cvg-section-inner">
+    <span class="cvg-section-label">How it works</span>
+    <h2 class="cvg-section-title">Three steps to optimized metadata</h2>
+    <p class="cvg-section-desc">From artwork to marketplace-ready in under a minute.</p>
+
+    <div class="cvg-steps">
+      <div class="cvg-step">
+        <div class="cvg-step-num">1</div>
+        <h3>Upload your artwork</h3>
+        <p>Drag and drop or click to upload. Supports PNG, JPG, SVG, EPS, and AI formats with automatic EPS-to-PNG rendering.</p>
+      </div>
+
+      <div class="cvg-step-connector">
+        <svg width="40" height="2" viewBox="0 0 40 2"><line x1="0" y1="1" x2="40" y2="1" stroke="currentColor" stroke-width="2" stroke-dasharray="4 4"/></svg>
+      </div>
+
+      <div class="cvg-step">
+        <div class="cvg-step-num">2</div>
+        <h3>AI analyzes your image</h3>
+        <p>Gemini Vision performs deep visual inspection, identifying subjects, objects, styles, colors, and themes with accuracy scoring.</p>
+      </div>
+
+      <div class="cvg-step-connector">
+        <svg width="40" height="2" viewBox="0 0 40 2"><line x1="0" y1="1" x2="40" y2="1" stroke="currentColor" stroke-width="2" stroke-dasharray="4 4"/></svg>
+      </div>
+
+      <div class="cvg-step">
+        <div class="cvg-step-num">3</div>
+        <h3>Export &amp; publish</h3>
+        <p>Copy metadata to your clipboard or export directly to any microstock platform. Edit keywords and settings before export.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonials -->
+<section id="testimonials" class="cvg-section">
+  <div class="cvg-section-inner">
+    <span class="cvg-section-label">Testimonials</span>
+    <h2 class="cvg-section-title">Trusted by stock contributors</h2>
+    <p class="cvg-section-desc">See how creators are scaling their microstock businesses.</p>
+
+    <div class="cvg-testimonials-grid">
+      <div class="cvg-testimonial-card">
+        <div class="cvg-testimonial-stars">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </div>
+        <p>"I used to spend 15 minutes per image writing metadata. Now it takes 3 seconds and the keywords are more relevant than what I wrote manually."</p>
+        <div class="cvg-testimonial-author">
+          <div class="cvg-testimonial-avatar">JR</div>
+          <div>
+            <strong>James R.</strong>
+            <span>Adobe Stock Contributor &middot; 12k+ files</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="cvg-testimonial-card">
+        <div class="cvg-testimonial-stars">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </div>
+        <p>"The batch processing is a game changer. I upload 50 EPS files and get perfectly formatted metadata for every platform. Saves me hours every week."</p>
+        <div class="cvg-testimonial-author">
+          <div class="cvg-testimonial-avatar">SK</div>
+          <div>
+            <strong>Sarah K.</strong>
+            <span>Vector Artist &middot; Multi-platform</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="cvg-testimonial-card">
+        <div class="cvg-testimonial-stars">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </div>
+        <p>"Finally a tool that understands stock metadata requirements. The anti-hallucination system means I can trust every keyword it generates."</p>
+        <div class="cvg-testimonial-author">
+          <div class="cvg-testimonial-avatar">ML</div>
+          <div>
+            <strong>Marco L.</strong>
+            <span>Illustrator &middot; Shutterstock Top Contributor</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Pricing -->
+<section id="pricing" class="cvg-section cvg-section-alt">
+  <div class="cvg-section-inner">
+    <span class="cvg-section-label">Pricing</span>
+    <h2 class="cvg-section-title">Simple, transparent pricing</h2>
+    <p class="cvg-section-desc">Start for free. Upgrade when you need more.</p>
+
+    <div class="cvg-pricing-grid">
+      <div class="cvg-pricing-card">
+        <div class="cvg-pricing-header">
+          <h3>Free</h3>
+          <div class="cvg-pricing-price"><span class="cvg-price-amount">$0</span><span class="cvg-price-period">/month</span></div>
+          <p>Perfect for trying out Csvgpt</p>
+        </div>
+        <ul class="cvg-pricing-features">
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            20 analyses per month
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            All platform formats
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Gemini 2.0 Flash model
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Copy &amp; export metadata
+          </li>
+        </ul>
+        <a href="{% url 'login_page' %}?mode=signup" class="cvg-btn cvg-btn-outline cvg-btn-full">Get Started</a>
+      </div>
+
+      <div class="cvg-pricing-card cvg-pricing-featured">
+        <div class="cvg-pricing-badge">Most Popular</div>
+        <div class="cvg-pricing-header">
+          <h3>Pro</h3>
+          <div class="cvg-pricing-price"><span class="cvg-price-amount">$12</span><span class="cvg-price-period">/month</span></div>
+          <p>For serious stock contributors</p>
+        </div>
+        <ul class="cvg-pricing-features">
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Unlimited analyses
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Batch processing
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Premium AI models
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Image-to-Prompt reverse engineering
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Priority support
+          </li>
+        </ul>
+        <a href="{% url 'login_page' %}?mode=signup" class="cvg-btn cvg-btn-primary cvg-btn-full">Start Pro Trial</a>
+      </div>
+
+      <div class="cvg-pricing-card">
+        <div class="cvg-pricing-header">
+          <h3>Enterprise</h3>
+          <div class="cvg-pricing-price"><span class="cvg-price-amount">Custom</span></div>
+          <p>For agencies and large portfolios</p>
+        </div>
+        <ul class="cvg-pricing-features">
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Everything in Pro
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Custom AI model training
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            API access &amp; webhooks
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Dedicated account manager
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            SLA guarantee
+          </li>
+        </ul>
+        <a href="{% url 'login_page' %}?mode=signup" class="cvg-btn cvg-btn-outline cvg-btn-full">Contact Sales</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="cvg-footer">
+  <div class="cvg-footer-inner">
+    <div class="cvg-footer-brand">
+      <svg class="cvg-footer-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+        <path d="M32 4 C32 4 36 14 36 20 C36 26 33.5 28 32 28 C30.5 28 28 26 28 20 C28 14 32 4 32 4Z" fill="currentColor"/>
+        <path d="M32 60 C32 60 28 50 28 44 C28 38 30.5 36 32 36 C33.5 36 36 38 36 44 C36 50 32 60 32 60Z" fill="currentColor"/>
+        <path d="M4 32 C4 32 14 28 20 28 C26 28 28 30.5 28 32 C28 33.5 26 36 20 36 C14 36 4 32 4 32Z" fill="currentColor"/>
+        <path d="M60 32 C60 32 50 36 44 36 C38 36 36 33.5 36 32 C36 30.5 38 28 44 28 C50 28 60 32 60 32Z" fill="currentColor"/>
+        <path d="M11.5 11.5 C11.5 11.5 17 15 21 17.5 C25 20 26.5 22 26.5 23.5 C26.5 25 25 25.5 23 24.5 C21 23.5 17 20 11.5 11.5Z" fill="currentColor"/>
+        <path d="M52.5 52.5 C52.5 52.5 47 49 43 46.5 C39 44 37.5 42 37.5 40.5 C37.5 39 39 38.5 41 39.5 C43 40.5 47 44 52.5 52.5Z" fill="currentColor"/>
+        <path d="M52.5 11.5 C52.5 11.5 47 15 43 17.5 C39 20 37.5 22 37.5 23.5 C37.5 25 39 25.5 41 24.5 C43 23.5 47 20 52.5 11.5Z" fill="currentColor"/>
+        <path d="M11.5 52.5 C11.5 52.5 17 49 21 46.5 C25 44 26.5 42 26.5 40.5 C26.5 39 25 38.5 23 39.5 C21 40.5 17 44 11.5 52.5Z" fill="currentColor"/>
+        <circle cx="32" cy="32" r="4.5" fill="currentColor"/>
+      </svg>
+      <span>Csvgpt</span>
+    </div>
+    <p class="cvg-footer-copy">&copy; 2026 Csvgpt. All rights reserved.</p>
+  </div>
+</footer>
+
+<script>
+document.querySelector('.cvg-nav-mobile-toggle')?.addEventListener('click', function() {
+  document.querySelector('.cvg-nav-links').classList.toggle('cvg-open');
+  document.querySelector('.cvg-nav-actions').classList.toggle('cvg-open');
+});
+</script>
+{% endblock %}

@@ -2,8 +2,12 @@ import json
 import logging
 import re
 
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from django.contrib import messages
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 
 from .gemini_client import (
@@ -87,6 +91,60 @@ PROMPT_SCHEMA = {
 }
 
 
+def landing(request):
+    return render(request, 'landing.html')
+
+
+def login_page(request):
+    if request.user.is_authenticated:
+        return redirect('index')
+
+    signup_mode = request.GET.get('mode') == 'signup'
+    ctx = {'signup_mode': signup_mode}
+
+    if request.method == 'POST':
+        action = request.POST.get('action', 'login')
+        email = request.POST.get('email', '').strip()
+        password = request.POST.get('password', '')
+
+        if action == 'signup':
+            name = request.POST.get('name', '').strip()
+            if not email or not password:
+                messages.error(request, 'Email and password are required.')
+                return render(request, 'login.html', ctx)
+            if User.objects.filter(email=email).exists():
+                messages.error(request, 'An account with this email already exists.')
+                return render(request, 'login.html', ctx)
+            user = User.objects.create_user(
+                username=email,
+                email=email,
+                password=password,
+                first_name=name,
+            )
+            login(request, user)
+            return redirect('index')
+        else:
+            if not email or not password:
+                messages.error(request, 'Email and password are required.')
+                return render(request, 'login.html', ctx)
+            user = authenticate(request, username=email, password=password)
+            if user is not None:
+                login(request, user)
+                next_url = request.GET.get('next', 'index')
+                return redirect(next_url)
+            else:
+                messages.error(request, 'Invalid email or password.')
+                return render(request, 'login.html', ctx)
+
+    return render(request, 'login.html', ctx)
+
+
+def logout_view(request):
+    logout(request)
+    return redirect('landing')
+
+
+@login_required
 def index(request):
     return render(request, 'tool.html')
 
