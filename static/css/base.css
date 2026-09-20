@@ -114,6 +114,30 @@ input, textarea, select {
     font-family: inherit;
 }
 
+svg {
+    color: var(--text-primary) !important;
+}
+
+/* Make all line-style icons white */
+.gp-nav-item svg,
+.gp-card-title svg,
+.gp-upload-icon svg,
+.gp-empty-icon svg,
+.gp-tip-icon svg,
+.gp-sidebar-toggle svg,
+.gp-field-btn svg,
+.gp-header-btn svg {
+    fill: none !important;
+    stroke: currentColor !important;
+}
+
+/* Filled icons like brand, user avatar, etc */
+.gp-brand-icon svg,
+.gp-user-avatar {
+    fill: #fff !important;
+    stroke: none !important;
+}
+
 ::selection {
     background: rgba(232, 160, 76, 0.25);
     color: var(--text-primary);
