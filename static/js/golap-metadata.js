@@ -506,6 +506,21 @@
             });
     }
 
+    function checkApiKeys() {
+        var warning = $('gp-api-warning');
+        if (!warning) return;
+        fetch('/api/check-models/')
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                var models = data.models || [];
+                var hasKeys = models.some(function (m) { return m.available; });
+                warning.style.display = hasKeys ? 'none' : '';
+            })
+            .catch(function () {
+                warning.style.display = '';
+            });
+    }
+
     function init() {
         var dropzone = $('gp-dropzone');
         var fileInput = $('gp-file-input');
@@ -685,6 +700,7 @@
         bindFileListEvents();
         updateView();
         checkAndRenderModels();
+        checkApiKeys();
     }
 
     function applySettingsToUI() {

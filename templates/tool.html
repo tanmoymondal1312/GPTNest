@@ -351,7 +351,7 @@
                             </div>
                         </div>
 
-                        <div class="gp-card gp-api-warning">
+                        <div class="gp-card gp-api-warning" id="gp-api-warning" style="display:none">
                             <div class="gp-card-header" style="margin-bottom:0">
                                 <div style="display:flex;align-items:center;gap:10px">
                                     <div style="width:36px;height:36px;border-radius:8px;background:rgba(232,160,76,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0">
@@ -553,6 +553,8 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(function(r) { return r.json(); })
             .then(function(data) {
                 var keys = data.keys || [];
+                var apiWarning = document.getElementById('gp-api-warning');
+                if (apiWarning) apiWarning.style.display = keys.length > 0 ? 'none' : '';
                 if (storedKeysCount) storedKeysCount.textContent = data.count || 0;
                 if (!storedKeysList) return;
                 if (keys.length === 0) {
