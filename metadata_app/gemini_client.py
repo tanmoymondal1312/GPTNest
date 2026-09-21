@@ -5,9 +5,9 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-GEMINI_MODELS = ['gemini-3.6-flash', 'gemini-3.7-flash', 'gemini-3.5-flash']
+GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-3.1-flash-lite', 'gemini-3.5-flash-lite']
 GEMINI_MODEL = GEMINI_MODELS[0]
-BACKOFF_DELAYS = [2000, 4000]
+BACKOFF_DELAYS = [1000, 2000]
 
 _visual_analysis_cache = {}
 
@@ -21,7 +21,7 @@ def get_gemini_client(api_key=None):
         from google import genai
         client = genai.Client(
             api_key=api_key,
-            http_options={'headers': {'User-Agent': 'aistudio-build'}, 'timeout': 120000},
+            http_options={'headers': {'User-Agent': 'aistudio-build'}, 'timeout': 60000},
         )
         return client
     except ImportError:

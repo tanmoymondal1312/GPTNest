@@ -1,9 +1,9 @@
 window.MMConfig = {
-    GEMINI_MODELS: ['gemini-3.6-flash', 'gemini-3.7-flash', 'gemini-3.5-flash'],
-    MAX_CONCURRENT: 1,
-    RETRY_DELAYS: [5000, 10000],
+    GEMINI_MODELS: ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-3.1-flash-lite', 'gemini-3.5-flash-lite'],
+    MAX_CONCURRENT: 4,
+    RETRY_DELAYS: [3000, 6000],
     MAX_RETRY: 2,
-    INTER_REQUEST_DELAY: 5000,
+    INTER_REQUEST_DELAY: 500,
 };
 
 window.MMCache = (function () {
@@ -217,7 +217,7 @@ window.MMQueue = (function () {
         if (rateLimitWaiting) return;
         rateLimitWaiting = true; emitProgress();
         if (rateLimitTimer) clearTimeout(rateLimitTimer);
-        rateLimitTimer = setTimeout(function () { rateLimitWaiting = false; emitProgress(); pump(); }, 15000);
+        rateLimitTimer = setTimeout(function () { rateLimitWaiting = false; emitProgress(); pump(); }, 8000);
     }
 
     return {
