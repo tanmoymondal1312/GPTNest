@@ -694,15 +694,35 @@
             files = Array.prototype.slice.call(files, 0, MAX_FILES);
         }
 
-        try {
-            for (var i = 0; i < files.length; i++) {
-                var item = await processFile(files[i]);
-                state.items.push(item);
+        var newItems = [];
+        for (var i = 0; i < files.length; i++) {
+            var item = {
+                id: Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+                fileName: files[i].name, fileType: files[i].type, mimeType: files[i].type || 'image/png',
+                status: 'idle', base64Data: null, previewUrl: null, fileHash: null,
+                analysis: null, title: '', description: '', keywords: [], primaryCategory: '', secondaryCategory: '',
+                contentType: '', visualStyle: '', dominantColors: [], backgroundType: 'Transparent',
+                mainSubject: '', confidence: 90, qualityScore: null, validation: null,
+                apiError: null, errorMessage: null, promptResult: null,
+                technicalDetails: null, generationVersion: 0,
+            };
+            state.items.push(item);
+            newItems.push({ item: item, file: files[i] });
+        }
+        updateView();
+
+        for (var j = 0; j < newItems.length; j++) {
+            var entry = newItems[j];
+            try {
+                var processed = await processFile(entry.file);
+                Object.assign(entry.item, processed);
+                renderBatchWorkspace();
+            } catch (e) {
+                console.error('[GP] processFile error:', entry.file.name, e);
+                entry.item.status = 'error';
+                entry.item.errorMessage = e.message || 'Processing failed';
+                renderBatchWorkspace();
             }
-            updateView();
-        } catch (e) {
-            console.error('[GP] handleFiles error:', e);
-            updateView();
         }
     }
 
