@@ -352,10 +352,15 @@
                 state.isProcessing = false;
                 var failed = state.items.filter(function (i) { return i.status === 'error'; }).length;
                 var succeeded = state.items.filter(function (i) { return i.status === 'completed'; }).length;
+                var rateLimited = state.items.filter(function (i) { return i.apiError && i.apiError.statusCode === 429; }).length;
                 if (failed > 0 && succeeded === 0) {
-                    MMUI.showToast('Generation Failed', 'All files failed. Check API key and try again.', 'error');
+                    var msg = rateLimited > 0
+                        ? 'API rate limit exceeded. Wait a few minutes or switch API key.'
+                        : 'All files failed. Check API key and try again.';
+                    MMUI.showToast('Generation Failed', msg, 'error');
                 } else if (failed > 0) {
-                    MMUI.showToast('Partial Success', succeeded + ' completed, ' + failed + ' failed.', 'warning');
+                    var detail = rateLimited > 0 ? ' (' + rateLimited + ' hit rate limit)' : '';
+                    MMUI.showToast('Partial Success', succeeded + ' completed, ' + failed + ' failed.' + detail, 'warning');
                 } else {
                     MMUI.showToast('Batch Complete', 'All ' + succeeded + ' files processed successfully.', 'success');
                 }

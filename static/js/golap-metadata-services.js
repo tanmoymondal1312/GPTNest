@@ -1,5 +1,5 @@
 window.MMConfig = {
-    GEMINI_MODELS: ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-3.1-flash-lite', 'gemini-3.5-flash-lite'],
+    GEMINI_MODELS: ['gemini-3.5-flash-lite', 'gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-3.1-flash-lite'],
     MAX_CONCURRENT: 4,
     RETRY_DELAYS: [3000, 6000],
     MAX_RETRY: 2,
@@ -176,9 +176,17 @@ window.MMQueue = (function () {
     function emitProgress() { if (onProgress) onProgress(getProgress()); }
     function cancel() { isCancelled = true; isProcessing = false; isPaused = false; rateLimitWaiting = false; if (rateLimitTimer) { clearTimeout(rateLimitTimer); rateLimitTimer = null; } queue = []; activeCount = 0; }
 
+    function checkBatchComplete() {
+        if (queue.length === 0 && activeCount === 0 && isProcessing) {
+            isProcessing = false; rateLimitWaiting = false; emitProgress();
+            if (onBatchComplete) onBatchComplete();
+        }
+    }
+
     function pump() {
         if (isCancelled) return;
-        if (queue.length === 0 && activeCount === 0) { isProcessing = false; rateLimitWaiting = false; emitProgress(); if (onBatchComplete) onBatchComplete(); return; }
+        checkBatchComplete();
+        if (!isProcessing) return;
         if (isPaused || rateLimitWaiting) { emitProgress(); return; }
         while (activeCount < MMConfig.MAX_CONCURRENT && queue.length > 0 && !isPaused && !rateLimitWaiting && !isCancelled) {
             var item = queue.shift(); activeCount++; processItem(item);
@@ -187,7 +195,7 @@ window.MMQueue = (function () {
     }
 
     async function processItem(item) {
-        if (isCancelled) { activeCount--; return; }
+        if (isCancelled) { activeCount--; checkBatchComplete(); return; }
         generationVersionCounter++;
         var myVersion = generationVersionCounter;
         item.generationVersion = myVersion;
@@ -196,10 +204,10 @@ window.MMQueue = (function () {
         emitProgress();
         try {
             var result = await MMGeminiService.analyzeArtwork(item, settings, platform, false, myVersion, selectedModel);
-            if (isCancelled) { activeCount--; return; }
+            if (isCancelled) { activeCount--; checkBatchComplete(); return; }
             if (result.item && result.item.generationVersion && result.item.generationVersion < myVersion) {
                 activeCount--;
-                pump();
+                checkBatchComplete();
                 return;
             }
             if (result.success) { completedCount++; } else { failedCount++; if (result.error && result.error.statusCode === 429) handleRateLimit(); }
@@ -209,7 +217,7 @@ window.MMQueue = (function () {
             if (onItemUpdated) onItemUpdated(Object.assign({}, item, { status: 'error', errorMessage: e.message || 'Failed.' }));
         } finally {
             activeCount--;
-            if (!rateLimitWaiting && !isPaused && queue.length > 0) { setTimeout(pump, MMConfig.INTER_REQUEST_DELAY); } else { pump(); }
+            if (!rateLimitWaiting && !isPaused && queue.length > 0) { setTimeout(pump, MMConfig.INTER_REQUEST_DELAY); } else { checkBatchComplete(); pump(); }
         }
     }
 
