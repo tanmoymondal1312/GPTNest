@@ -25,16 +25,37 @@ def _get_user_keys(user):
     return list(ApiKey.objects.filter(user=user).values_list('key', flat=True))
 
 
+def _get_active_key(user):
+    active = ApiKey.objects.filter(user=user, is_active=True).first()
+    return active.key if active else None
+
+
+def _set_active_key(user, key):
+    ApiKey.objects.filter(user=user).update(is_active=False)
+    updated = ApiKey.objects.filter(user=user, key=key).update(is_active=True)
+    return updated > 0
+
+
 def _add_user_key(user, key):
     if ApiKey.objects.filter(user=user, key=key).exists():
         return False
-    ApiKey.objects.create(user=user, key=key)
+    is_first = not ApiKey.objects.filter(user=user).exists()
+    ApiKey.objects.create(user=user, key=key, is_active=is_first)
     return True
 
 
 def _delete_user_key(user, key):
-    deleted, _ = ApiKey.objects.filter(user=user, key=key).delete()
-    return deleted > 0
+    obj = ApiKey.objects.filter(user=user, key=key).first()
+    if not obj:
+        return False
+    was_active = obj.is_active
+    obj.delete()
+    if was_active:
+        next_key = ApiKey.objects.filter(user=user).first()
+        if next_key:
+            next_key.is_active = True
+            next_key.save()
+    return True
 from .eps_renderer import render_eps_to_png
 from .platforms import PLATFORMS
 from .validation import (
@@ -307,7 +328,8 @@ def analyze_metadata(request):
         return JsonResponse(cached)
 
     user_keys = _get_user_keys(request.user) if request.user.is_authenticated else []
-    api_key = body.get('apiKey') or (user_keys[0] if user_keys else None)
+    active_key = _get_active_key(request.user) if request.user.is_authenticated else None
+    api_key = body.get('apiKey') or active_key or (user_keys[0] if user_keys else None)
 
     logger.info(f'[AI Vision] Processing {file_name} | user={request.user} | key={"yes" if api_key else "NO"} | model={requested_model or GEMINI_MODEL}')
 
@@ -521,14 +543,16 @@ def api_keys_list(request):
     if request.method != 'GET':
         return JsonResponse({'error': 'Invalid request method'}, status=405)
 
-    keys = _get_user_keys(request.user)
+    keys = ApiKey.objects.filter(user=request.user).order_by('-is_active', '-created_at')
     masked = []
     for k in keys:
         masked.append({
-            'id': k[:8] + '...' + k[-4:] if len(k) > 12 else '***',
-            'key': k,
+            'id': k.key[:8] + '...' + k.key[-4:] if len(k.key) > 12 else '***',
+            'key': k.key,
+            'is_active': k.is_active,
+            'label': k.label or '',
         })
-    return JsonResponse({'keys': masked, 'count': len(keys)})
+    return JsonResponse({'keys': masked, 'count': len(masked)})
 
 
 @csrf_exempt
@@ -570,9 +594,32 @@ def api_keys_delete(request):
     if not key:
         return JsonResponse({'error': 'API key is required.'}, status=400)
 
-    _delete_user_key(request.user, key)
+    if not _delete_user_key(request.user, key):
+        return JsonResponse({'error': 'Key not found.'}, status=404)
 
-    return JsonResponse({'success': True, 'count': len(_get_user_keys(request.user))})
+    active = _get_active_key(request.user)
+    return JsonResponse({'success': True, 'count': len(_get_user_keys(request.user)), 'active_key': active})
+
+
+@csrf_exempt
+@login_required
+def api_keys_activate(request):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+    try:
+        body = json.loads(request.body)
+    except (json.JSONDecodeError, ValueError):
+        return JsonResponse({'error': 'Invalid JSON body'}, status=400)
+
+    key = body.get('key', '').strip()
+    if not key:
+        return JsonResponse({'error': 'API key is required.'}, status=400)
+
+    if not _set_active_key(request.user, key):
+        return JsonResponse({'error': 'Key not found.'}, status=404)
+
+    return JsonResponse({'success': True, 'active_key': key})
 
 
 @csrf_exempt
@@ -581,6 +628,9 @@ def api_keys_get_first(request):
     if request.method != 'GET':
         return JsonResponse({'error': 'Invalid request method'}, status=405)
 
+    active = _get_active_key(request.user)
+    if active:
+        return JsonResponse({'key': active, 'has_key': True})
     keys = _get_user_keys(request.user)
     if keys:
         return JsonResponse({'key': keys[0], 'has_key': True})

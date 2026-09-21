@@ -412,7 +412,7 @@
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"></path></svg>
                 OpenRouter
             </button>
-            <div class="gp-modal-left-footer">Keys are encrypted & stored locally in your browser.</div>
+            <div class="gp-modal-left-footer">Keys are encrypted & stored securely on server.</div>
         </div>
         <div class="gp-modal-right">
             <div class="gp-modal-right-header">
@@ -578,8 +578,24 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (openModalIfEmpty) openApiModal();
                 } else {
                     storedKeysList.innerHTML = keys.map(function(k) {
-                        return '<div class="gp-modal-key-item"><span class="gp-modal-key-text">' + k.id + '</span><button class="gp-modal-key-remove" data-key="' + k.key + '" type="button">&times;</button></div>';
+                        var activeClass = k.is_active ? ' active' : '';
+                        var activeBtn = k.is_active
+                            ? '<span class="gp-key-active-badge">ACTIVE</span>'
+                            : '<button class="gp-key-activate-btn" data-key="' + k.key + '" type="button">Activate</button>';
+                        return '<div class="gp-modal-key-item' + activeClass + '">' +
+                            '<div class="gp-key-info"><span class="gp-modal-key-text">' + k.id + '</span>' + activeBtn + '</div>' +
+                            '<button class="gp-modal-key-remove" data-key="' + k.key + '" type="button" title="Remove key">&times;</button></div>';
                     }).join('');
+                    storedKeysList.querySelectorAll('.gp-key-activate-btn').forEach(function(btn) {
+                        btn.addEventListener('click', function() {
+                            fetch('/api/keys/activate/', {
+                                method: 'POST',
+                                credentials: 'same-origin',
+                                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+                                body: JSON.stringify({ key: btn.dataset.key })
+                            }).then(function() { loadKeys(false); });
+                        });
+                    });
                     storedKeysList.querySelectorAll('.gp-modal-key-remove').forEach(function(btn) {
                         btn.addEventListener('click', function() {
                             var keyToDelete = btn.dataset.key;
