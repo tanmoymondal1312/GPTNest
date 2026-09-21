@@ -4,8 +4,47 @@ import struct
 import subprocess
 import tempfile
 import base64
+import glob
+import shutil
 
 _eps_cache = {}
+
+
+def _find_ghostscript():
+    gs_path = shutil.which('gs')
+    if gs_path:
+        return gs_path
+
+    common_paths = [
+        r'C:\Program Files\gs\*\bin\gswin64c.exe',
+        r'C:\Program Files\gs\*\bin\gswin32c.exe',
+        r'C:\Program Files (x86)\gs\*\bin\gswin64c.exe',
+        r'C:\Program Files (x86)\gs\*\bin\gswin32c.exe',
+    ]
+    for pattern in common_paths:
+        matches = sorted(glob.glob(pattern), reverse=True)
+        if matches:
+            return matches[0]
+
+    convert_path = shutil.which('convert')
+    if convert_path:
+        return 'convert'
+
+    return None
+
+
+def _find_inkscape():
+    inkscape = shutil.which('inkscape')
+    if inkscape:
+        return inkscape
+    common = [
+        r'C:\Program Files\Inkscape\bin\inkscape.exe',
+        r'C:\Program Files (x86)\Inkscape\bin\inkscape.exe',
+    ]
+    for p in common:
+        if os.path.exists(p):
+            return p
+    return None
 
 
 def clean_eps_buffer(raw_bytes):
@@ -82,31 +121,18 @@ def render_eps_to_png(base64_data, filename='artwork.eps'):
             f.write(clean_buffer)
 
         render_success = False
+        gs_path = _find_ghostscript()
 
-        try:
-            subprocess.run(
-                [
-                    'gs', '-dSAFER', '-dBATCH', '-dNOPAUSE', '-dEPSCrop',
-                    '-sDEVICE=pngalpha', f'-r{dpi}',
-                    '-dTextAlphaBits=4', '-dGraphicsAlphaBits=4',
-                    f'-sOutputFile={png_path}', eps_path,
-                ],
-                check=True, timeout=15,
-                capture_output=True,
-            )
-            if os.path.exists(png_path):
-                render_success = True
-        except (FileNotFoundError, subprocess.CalledProcessError, subprocess.TimeoutExpired):
-            pass
-
-        if not render_success:
+        if gs_path and gs_path != 'convert':
             try:
                 subprocess.run(
                     [
-                        'convert', '-density', str(dpi), '-colorspace', 'sRGB',
-                        eps_path, '-resize', '2000x2000>', png_path,
+                        gs_path, '-dSAFER', '-dBATCH', '-dNOPAUSE', '-dEPSCrop',
+                        '-sDEVICE=pngalpha', f'-r{dpi}',
+                        '-dTextAlphaBits=4', '-dGraphicsAlphaBits=4',
+                        f'-sOutputFile={png_path}', eps_path,
                     ],
-                    check=True, timeout=15,
+                    check=True, timeout=30,
                     capture_output=True,
                 )
                 if os.path.exists(png_path):
@@ -114,8 +140,41 @@ def render_eps_to_png(base64_data, filename='artwork.eps'):
             except (FileNotFoundError, subprocess.CalledProcessError, subprocess.TimeoutExpired):
                 pass
 
+        if not render_success and gs_path == 'convert':
+            try:
+                subprocess.run(
+                    [
+                        'convert', '-density', str(dpi), '-colorspace', 'sRGB',
+                        eps_path, '-resize', '2000x2000>', png_path,
+                    ],
+                    check=True, timeout=30,
+                    capture_output=True,
+                )
+                if os.path.exists(png_path):
+                    render_success = True
+            except (FileNotFoundError, subprocess.CalledProcessError, subprocess.TimeoutExpired):
+                pass
+
+        if not render_success:
+            inkscape = _find_inkscape()
+            if inkscape:
+                try:
+                    subprocess.run(
+                        [inkscape, '--export-type=png', f'--export-dpi={dpi}',
+                         f'--export-filename={png_path}', eps_path],
+                        check=True, timeout=30,
+                        capture_output=True,
+                    )
+                    if os.path.exists(png_path):
+                        render_success = True
+                except (FileNotFoundError, subprocess.CalledProcessError, subprocess.TimeoutExpired):
+                    pass
+
         if not render_success or not os.path.exists(png_path):
-            raise ValueError('Unable to render EPS preview. Please retry.')
+            raise ValueError(
+                'EPS preview render failed. Install Ghostscript (gs) for EPS support. '
+                'Download from: https://ghostscript.com/releases/gsdnld.html'
+            )
 
         with open(png_path, 'rb') as f:
             png_buffer = f.read()
