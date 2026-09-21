@@ -306,10 +306,10 @@ def analyze_metadata(request):
         logger.info(f'[AI Vision Cache Hit] Reusing visual analysis for {file_name or "artwork"}')
         return JsonResponse(cached)
 
-    user_keys = _get_user_keys(request.user)
+    user_keys = _get_user_keys(request.user) if request.user.is_authenticated else []
     api_key = body.get('apiKey') or (user_keys[0] if user_keys else None)
 
-    logger.info(f'[AI Vision] Processing {file_name} | key={"yes" if api_key else "NO"} | model={requested_model or GEMINI_MODEL}')
+    logger.info(f'[AI Vision] Processing {file_name} | user={request.user} | key={"yes" if api_key else "NO"} | model={requested_model or GEMINI_MODEL}')
 
     try:
         client = get_gemini_client(api_key)
