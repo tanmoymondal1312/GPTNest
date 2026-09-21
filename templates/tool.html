@@ -334,19 +334,38 @@
                                 </div>
                             </div>
 
-                            <!-- File list: visible when files are selected -->
-                            <div class="gp-file-list-wrap" id="gp-file-list-wrap" style="display:none">
-                                <div class="gp-file-list" id="gp-file-list"></div>
-                                <div class="gp-file-list-footer">
-                                    <div class="gp-file-list-info">
-                                        <span id="gp-file-count">0</span> file(s) selected
-                                        &middot; <span id="gp-file-done-count">0</span> done
-                                        &middot; <span id="gp-file-fail-count">0</span> failed
+                            <!-- Batch status + file list: visible when files are selected -->
+                            <div class="gp-batch-workspace" id="gp-batch-workspace" style="display:none">
+                                <!-- Sticky status bar -->
+                                <div class="gp-batch-status" id="gp-batch-status">
+                                    <div class="gp-batch-status-counters">
+                                        <span class="gp-counter" id="gp-counter-total"><span class="gp-counter-val">0</span><span class="gp-counter-label">Files</span></span>
+                                        <span class="gp-counter" id="gp-counter-done"><span class="gp-counter-val">0</span><span class="gp-counter-label">Done</span></span>
+                                        <span class="gp-counter" id="gp-counter-processing"><span class="gp-counter-val">0</span><span class="gp-counter-label">Processing</span></span>
+                                        <span class="gp-counter" id="gp-counter-pending"><span class="gp-counter-val">0</span><span class="gp-counter-label">Pending</span></span>
+                                        <span class="gp-counter gp-counter-fail" id="gp-counter-failed" style="display:none"><span class="gp-counter-val">0</span><span class="gp-counter-label">Failed</span></span>
                                     </div>
-                                    <button class="gp-btn-generate" id="gp-generate-btn" type="button">
-                                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-                                        Generate All
-                                    </button>
+                                    <div class="gp-batch-status-actions" id="gp-batch-status-actions"></div>
+                                </div>
+
+                                <!-- Progress bar -->
+                                <div class="gp-batch-progress" id="gp-batch-progress" style="display:none">
+                                    <div class="gp-progress-track"><div class="gp-progress-fill" id="gp-batch-progress-fill"></div></div>
+                                </div>
+
+                                <!-- File list: scrollable -->
+                                <div class="gp-batch-table-wrap">
+                                    <table class="gp-batch-table">
+                                        <thead><tr>
+                                            <th class="gp-bt-check"><input type="checkbox" id="gp-check-all" title="Select all"></th>
+                                            <th class="gp-bt-thumb"></th>
+                                            <th class="gp-bt-name">Filename</th>
+                                            <th class="gp-bt-title">Title</th>
+                                            <th class="gp-bt-kw">Keywords</th>
+                                            <th class="gp-bt-status">Status</th>
+                                        </tr></thead>
+                                        <tbody id="gp-batch-tbody"></tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>
@@ -366,20 +385,7 @@
                             </div>
                         </div>
 
-                        <!-- Progress bar -->
-                        <div class="gp-progress" id="gp-progress" style="display:none">
-                            <div class="gp-progress-track"><div class="gp-progress-fill" id="gp-progress-fill"></div></div>
-                            <div class="gp-progress-text" id="gp-progress-text"></div>
-                        </div>
-
-                        <div class="gp-rate-limit" id="gp-rate-limit" style="display:none">
-                            Rate limit reached. Waiting before retrying...
-                        </div>
-
-                        <!-- Inline results area -->
-                        <div id="gp-results-area" style="display:none"></div>
-
-                        <!-- Empty state: visible only when no files -->
+                        <!-- Empty state -->
                         <div class="gp-card" id="gp-empty-card">
                             <div class="gp-empty-state">
                                 <div class="gp-empty-icon">

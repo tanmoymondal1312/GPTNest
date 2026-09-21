@@ -46,26 +46,24 @@
 
     function updateView() {
         var dropzone = $('gp-dropzone');
-        var fileListWrap = $('gp-file-list-wrap');
+        var batchWorkspace = $('gp-batch-workspace');
         var headerActions = $('gp-upload-header-actions');
         var emptyCard = $('gp-empty-card');
-        var resultsArea = $('gp-results-area');
         var header = $('gp-header');
         var platforms = $('gp-platforms');
 
         if (state.items.length === 0) {
             dropzone.style.display = '';
-            fileListWrap.style.display = 'none';
+            batchWorkspace.style.display = 'none';
             headerActions.style.display = 'none';
             emptyCard.style.display = '';
-            resultsArea.style.display = 'none';
             header.style.display = 'none';
             platforms.style.display = 'none';
             return;
         }
 
         dropzone.style.display = 'none';
-        fileListWrap.style.display = '';
+        batchWorkspace.style.display = '';
         headerActions.style.display = '';
         emptyCard.style.display = 'none';
         header.style.display = '';
@@ -79,61 +77,96 @@
             updateView();
         });
 
-        renderFileList();
-
-        var hasCompleted = state.items.some(function (i) { return i.status === 'completed'; });
-        if (hasCompleted || state.items.length > 1) {
-            resultsArea.style.display = '';
-            MMUI.renderBatchView(resultsArea, state.items, state.platform, { onBind: bindBatchViewEvents });
-        } else {
-            resultsArea.style.display = 'none';
-        }
+        renderBatchWorkspace();
     }
 
-    function renderFileList() {
-        var list = $('gp-file-list');
-        if (!list) return;
-        list.innerHTML = '';
+    function renderBatchWorkspace() {
+        var items = state.items;
+        var total = items.length;
+        var done = items.filter(function (i) { return i.status === 'completed'; }).length;
+        var failed = items.filter(function (i) { return i.status === 'error'; }).length;
+        var processing = items.filter(function (i) { return i.status === 'analyzing' || i.status === 'rendering_eps'; }).length;
+        var pending = items.filter(function (i) { return i.status === 'idle' || i.status === 'preview_ready'; }).length;
+        var analyzing = processing > 0;
+
+        $('gp-counter-total').querySelector('.gp-counter-val').textContent = total;
+        $('gp-counter-done').querySelector('.gp-counter-val').textContent = done;
+        $('gp-counter-processing').querySelector('.gp-counter-val').textContent = processing;
+        $('gp-counter-pending').querySelector('.gp-counter-val').textContent = pending;
+
+        var failEl = $('gp-counter-failed');
+        if (failed > 0) { failEl.style.display = ''; failEl.querySelector('.gp-counter-val').textContent = failed; }
+        else { failEl.style.display = 'none'; }
+
+        var pct = total > 0 ? (done / total * 100) : 0;
+        var progressBar = $('gp-batch-progress');
+        var progressFill = $('gp-batch-progress-fill');
+        if (analyzing) {
+            progressBar.style.display = '';
+            progressFill.style.width = pct + '%';
+        } else {
+            progressBar.style.display = 'none';
+        }
+
+        var actionsEl = $('gp-batch-status-actions');
+        var allDone = total > 0 && pending === 0 && processing === 0;
+
+        if (allDone) {
+            actionsEl.innerHTML =
+                '<button class="gp-field-btn primary" id="gp-act-csv" type="button">Download CSV</button>' +
+                '<button class="gp-field-btn" id="gp-act-json" type="button">Download JSON</button>';
+            $('gp-act-csv').addEventListener('click', function () { MMExport.toCsv(state.items); });
+            $('gp-act-json').addEventListener('click', function () { MMExport.toJson(state.items); });
+        } else {
+            var pendingCount = items.filter(function (i) { return i.status === 'idle' || i.status === 'preview_ready'; }).length;
+            if (analyzing) {
+                actionsEl.innerHTML =
+                    '<button class="gp-gen-btn running" type="button" disabled><span class="gp-gen-spinner"></span> Generating\u2026</button>';
+            } else if (pendingCount > 0) {
+                actionsEl.innerHTML =
+                    '<button class="gp-gen-btn" id="gp-act-generate" type="button">\u26A1 Generate All (' + pendingCount + ')</button>';
+                $('gp-act-generate').addEventListener('click', function () { generateAllBatch(); });
+            } else {
+                actionsEl.innerHTML = '';
+            }
+        }
+
+        renderBatchTable();
+    }
+
+    function renderBatchTable() {
+        var tbody = $('gp-batch-tbody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
 
         state.items.forEach(function (item, idx) {
             var statusMap = {
-                'idle': ['st-idle', 'Waiting'],
-                'preview_ready': ['st-ready', 'Ready'],
-                'rendering_eps': ['st-rendering', 'Rendering...'],
-                'analyzing': ['st-analyzing', 'Analyzing...'],
-                'completed': ['st-completed', 'Done'],
-                'error': ['st-error', 'Failed'],
+                'idle': ['s-idle', 'Pending'],
+                'preview_ready': ['s-ready', 'Ready'],
+                'rendering_eps': ['s-rendering', 'Rendering\u2026', true],
+                'analyzing': ['s-analyzing', 'Analyzing\u2026', true],
+                'completed': ['s-done', 'Done'],
+                'error': ['s-error', 'Failed'],
             };
-            var st = statusMap[item.status] || ['st-idle', item.status];
-            var sizeText = item.technicalDetails ? (item.technicalDetails.width + 'x' + item.technicalDetails.height) : (item.fileType || '');
+            var st = statusMap[item.status] || ['s-idle', item.status];
+            var kwCount = item.keywords ? item.keywords.length : 0;
 
-            var div = document.createElement('div');
-            div.className = 'gp-file-item';
-            div.setAttribute('data-idx', idx);
-            div.innerHTML =
-                '<img class="gp-file-thumb" src="' + (item.previewUrl || '') + '" alt="">' +
-                '<div class="gp-file-info">' +
-                    '<div class="gp-file-name">' + MMUI.escapeHtml(item.fileName) + '</div>' +
-                    '<div class="gp-file-meta">' + sizeText + (item.errorMessage ? ' &middot; ' + MMUI.escapeHtml(item.errorMessage) : '') + '</div>' +
-                '</div>' +
-                '<span class="gp-file-status ' + st[0] + '">' + st[1] + '</span>' +
-                '<button class="gp-file-remove" data-idx="' + idx + '" title="Remove">&times;</button>';
-            list.appendChild(div);
+            var tr = document.createElement('tr');
+            tr.innerHTML =
+                '<td class="gp-bt-check"><input type="checkbox" class="gp-batch-check" data-idx="' + idx + '"></td>' +
+                '<td class="gp-bt-thumb"><img class="gp-table-thumb" src="' + (item.previewUrl || '') + '" alt=""></td>' +
+                '<td class="gp-bt-name"><span class="gp-bt-filename" title="' + MMUI.escapeHtml(item.fileName) + '">' + MMUI.escapeHtml(item.fileName) + '</span></td>' +
+                '<td class="gp-bt-title"><span class="gp-bt-title-text">' + MMUI.escapeHtml(item.title || (item.status === 'error' ? (item.errorMessage || '\u2014') : '\u2014')) + '</span></td>' +
+                '<td class="gp-bt-kw" style="text-align:center">' + kwCount + '</td>' +
+                '<td class="gp-bt-status"><span class="gp-status-pill ' + st[0] + '">' + (st[2] ? '<span class="gp-spinner"></span> ' : '') + st[1] + '</span></td>';
+            tbody.appendChild(tr);
         });
 
-        var doneCount = state.items.filter(function (i) { return i.status === 'completed'; }).length;
-        var failCount = state.items.filter(function (i) { return i.status === 'error'; }).length;
-        var pendingCount = state.items.filter(function (i) { return i.status === 'idle' || i.status === 'preview_ready' || i.status === 'rendering_eps'; }).length;
-        var analyzing = state.items.some(function (i) { return i.status === 'analyzing'; });
-
-        $('gp-file-count').textContent = state.items.length;
-        $('gp-file-done-count').textContent = doneCount;
-        $('gp-file-fail-count').textContent = failCount;
-
-        var genBtn = $('gp-generate-btn');
-        if (genBtn) {
-            genBtn.disabled = pendingCount === 0 && !analyzing;
-            genBtn.textContent = analyzing ? 'Generating...' : 'Generate All' + (pendingCount > 0 ? ' (' + pendingCount + ')' : '');
+        var checkAll = $('gp-check-all');
+        if (checkAll) {
+            checkAll.addEventListener('change', function () {
+                document.querySelectorAll('.gp-batch-check').forEach(function (cb) { cb.checked = checkAll.checked; });
+            });
         }
     }
 
@@ -267,32 +300,13 @@
     }
 
     async function generateAllBatch() {
-        var checkedBoxes = document.querySelectorAll('.gp-batch-check:checked');
-        var checkedIndices = Array.from(checkedBoxes).map(function (cb) { return parseInt(cb.dataset.idx); });
-
-        var pending;
-        if (checkedIndices.length > 0) {
-            pending = state.items.filter(function (item, idx) {
-                return checkedIndices.indexOf(idx) !== -1 && (item.status === 'idle' || item.status === 'error' || item.status === 'preview_ready') && item.base64Data;
-            });
-        } else {
-            pending = state.items.filter(function (i) { return (i.status === 'idle' || i.status === 'error' || i.status === 'preview_ready') && i.base64Data; });
-        }
-        if (pending.length === 0) { MMUI.showToast('Info', checkedIndices.length > 0 ? 'Selected files already processed or no artwork' : 'No files to process', 'info'); return; }
-
-        var progressEl = $('gp-progress');
-        var fillEl = $('gp-progress-fill');
-        var textEl = $('gp-progress-text');
-        progressEl.style.display = '';
-        fillEl.style.width = '0%';
-        textEl.textContent = 'Starting batch processing...';
+        var pending = state.items.filter(function (i) { return (i.status === 'idle' || i.status === 'error' || i.status === 'preview_ready') && i.base64Data; });
+        if (pending.length === 0) { MMUI.showToast('Info', 'No files to process', 'info'); return; }
 
         MMQueue.startBatch(state.items, state.settings, state.platform, {
             onProgress: function (p) {
                 var pct = p.total > 0 ? (p.completed / p.total * 100) : 0;
-                fillEl.style.width = pct + '%';
-                textEl.textContent = p.completed + '/' + p.total + ' completed' + (p.rateLimitWaiting ? ' (rate limit cooldown...)' : '') + (p.isPaused ? ' (paused)' : '');
-                if (p.rateLimitWaiting) $('gp-rate-limit').style.display = ''; else $('gp-rate-limit').style.display = 'none';
+                renderBatchWorkspace();
             },
             onItemUpdated: function (updatedItem) {
                 var target = _findItemById(updatedItem.id);
@@ -305,24 +319,20 @@
                 if (state.selectedItem && state.selectedItem.id === updatedItem.id) {
                     state.selectedItem = target || updatedItem;
                 }
-                updateView();
+                renderBatchWorkspace();
             },
             onBatchComplete: function () {
-                progressEl.style.display = 'none';
-                $('gp-rate-limit').style.display = 'none';
                 var failed = state.items.filter(function (i) { return i.status === 'error'; }).length;
                 var succeeded = state.items.filter(function (i) { return i.status === 'completed'; }).length;
                 if (failed > 0 && succeeded === 0) {
                     MMUI.showToast('Generation Failed', 'All files failed. Check API key and try again.', 'error');
                 } else if (failed > 0) {
-                    MMUI.showToast('Partial Success', succeeded + ' completed, ' + failed + ' failed. Exporting CSV for completed files...', 'warning');
+                    MMUI.showToast('Partial Success', succeeded + ' completed, ' + failed + ' failed.', 'warning');
                 } else {
                     MMUI.showToast('Batch Complete', 'All ' + succeeded + ' files processed successfully.', 'success');
                 }
-                updateView();
-                setTimeout(function () {
-                    MMExport.toCsv(state.items);
-                }, 800);
+                renderBatchWorkspace();
+                setTimeout(function () { MMExport.toCsv(state.items); }, 800);
             },
         }, state.selectedModel);
     }
@@ -400,63 +410,6 @@
             });
             addKwInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') addKwBtn.click(); });
         }
-    }
-
-    function bindBatchViewEvents() {
-        var checkAll = $('gp-check-all');
-        if (checkAll) {
-            checkAll.addEventListener('change', function () {
-                document.querySelectorAll('.gp-batch-check').forEach(function (cb) { cb.checked = checkAll.checked; });
-            });
-        }
-
-        document.querySelectorAll('.gp-table tbody tr').forEach(function (row) {
-            row.addEventListener('click', function (e) {
-                if (e.target.closest('.gp-batch-check') || e.target.closest('button')) return;
-                var idx = parseInt(row.dataset.idx);
-                state.selectedItem = state.items[idx];
-                state.view = 'detail';
-                updateView();
-            });
-        });
-
-        var genBtn = $('gp-batch-generate');
-        if (genBtn) genBtn.addEventListener('click', generateAllBatch);
-
-        var csvBtn = $('gp-batch-export-csv');
-        if (csvBtn) csvBtn.addEventListener('click', function () { MMExport.toCsv(state.items); });
-
-        var jsonBtn = $('gp-batch-export-json');
-        if (jsonBtn) jsonBtn.addEventListener('click', function () { MMExport.toJson(state.items); });
-
-        var clearBtn = $('gp-batch-clear');
-        if (clearBtn) clearBtn.addEventListener('click', function () {
-            state.items = []; state.selectedItem = null; state.view = 'upload';
-            updateView();
-        });
-
-        var addBtn = $('gp-batch-add');
-        if (addBtn) addBtn.addEventListener('click', function () { $('gp-file-input').click(); });
-
-        var addBtn2 = $('gp-results-add');
-        if (addBtn2) addBtn2.addEventListener('click', function () { $('gp-file-input').click(); });
-    }
-
-    function bindFileListEvents() {
-        var list = $('gp-file-list');
-        if (!list) return;
-        list.addEventListener('click', function (e) {
-            var btn = e.target.closest('.gp-file-remove');
-            if (!btn) return;
-            var idx = parseInt(btn.getAttribute('data-idx'));
-            if (idx >= 0 && idx < state.items.length) {
-                state.items.splice(idx, 1);
-                if (state.selectedItem && state.selectedItem.id === (state.items[idx] && state.items[idx].id)) {
-                    state.selectedItem = null;
-                }
-                updateView();
-            }
-        });
     }
 
     function checkAndRenderModels() {
@@ -564,9 +517,6 @@
             state.items = []; state.selectedItem = null; state.view = 'upload';
             updateView();
         });
-
-        var generateBtn = $('gp-generate-btn');
-        if (generateBtn) generateBtn.addEventListener('click', function () { generateAllBatch(); });
 
         document.querySelectorAll('.gp-sample-btn').forEach(function (btn) {
             btn.addEventListener('click', function (e) {
@@ -697,7 +647,6 @@
 
         applySettingsToUI();
         syncMetaSliders();
-        bindFileListEvents();
         updateView();
         checkAndRenderModels();
         checkApiKeys();
@@ -732,23 +681,13 @@
         }
 
         try {
-            $('gp-progress').style.display = '';
-            $('gp-progress-fill').style.width = '0%';
-            $('gp-progress-text').textContent = 'Processing files...';
-
             for (var i = 0; i < files.length; i++) {
-                var pct = (i / files.length) * 100;
-                $('gp-progress-fill').style.width = pct + '%';
-                $('gp-progress-text').textContent = 'Processing ' + (i + 1) + '/' + files.length + ': ' + files[i].name;
                 var item = await processFile(files[i]);
                 state.items.push(item);
             }
-
-            $('gp-progress').style.display = 'none';
             updateView();
         } catch (e) {
             console.error('[GP] handleFiles error:', e);
-            $('gp-progress').style.display = 'none';
             updateView();
         }
     }
