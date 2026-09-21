@@ -1,5 +1,5 @@
 window.MMConfig = {
-    GEMINI_MODELS: ['gemini-3.6-flash', 'gemini-3.7-flash', 'gemini-3.5-flash'],
+    GEMINI_MODELS: ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'],
     MAX_CONCURRENT: 1,
     RETRY_DELAYS: [2000, 4000],
     MAX_RETRY: 2,
@@ -74,6 +74,7 @@ window.MMGeminiService = (function () {
             try {
                 var res = await fetch('/api/analyze-metadata/', {
                     method: 'POST',
+                    credentials: 'same-origin',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         image: item.base64Data, mimeType: item.mimeType || 'image/png',
@@ -145,6 +146,7 @@ window.MMGeminiService = (function () {
         try {
             var res = await fetch('/api/image-to-prompt/', {
                 method: 'POST',
+                credentials: 'same-origin',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ image: item.base64Data, mimeType: item.mimeType || 'image/png', fileName: item.fileName }),
             });

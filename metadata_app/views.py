@@ -264,7 +264,7 @@ def _post_process_metadata(parsed):
 
 
 @csrf_exempt
-async def analyze_metadata(request):
+def analyze_metadata(request):
     if request.method != 'POST':
         return JsonResponse({'error': 'Invalid request method'}, status=405)
 
@@ -291,10 +291,13 @@ async def analyze_metadata(request):
 
     api_key = body.get('apiKey') or (request.session.get('gemini_api_keys', [None])[0] if request.session.get('gemini_api_keys') else None)
 
+    logger.info(f'[AI Vision] Processing {file_name} | key={"yes" if api_key else "NO"} | model={requested_model or GEMINI_MODEL}')
+
     try:
         client = get_gemini_client(api_key)
     except ValueError as e:
-        return JsonResponse({'error': str(e)}, status=500)
+        logger.error(f'[AI Vision] Client init failed: {e}')
+        return JsonResponse({'error': str(e), 'errorCode': 'NO_API_KEY'}, status=400)
 
     system_instruction = _build_system_instruction(settings)
     user_prompt = """Perform a deep 2-stage visual analysis of this rendered artwork.
@@ -313,12 +316,10 @@ CRITICAL: Do NOT invent objects, environments, brands, or concepts not visible i
 
     request_payload = {
         'model': requested_model or GEMINI_MODEL,
-        'contents': {
-            'parts': [
-                {'inline_data': {'mime_type': mime_type, 'data': image}},
-                {'text': user_prompt},
-            ],
-        },
+        'contents': [
+            {'inline_data': {'mime_type': mime_type, 'data': image}},
+            user_prompt,
+        ],
         'config': {
             'system_instruction': system_instruction,
             **GENAI_SCHEMA,
@@ -326,14 +327,15 @@ CRITICAL: Do NOT invent objects, environments, brands, or concepts not visible i
     }
 
     try:
+        logger.info(f'[AI Vision] Calling Gemini API for {file_name}...')
         response = generate_content_with_retry(client, request_payload)
         text_output = response.text
         if not text_output:
             raise Exception('AI returned empty response.')
 
+        logger.info(f'[AI Vision] Got response for {file_name} ({len(text_output)} chars)')
         parsed = json.loads(text_output)
 
-        # Post-process: normalize, validate
         processed, is_valid, issues = _post_process_metadata(parsed)
 
         if not is_valid:
@@ -343,20 +345,20 @@ CRITICAL: Do NOT invent objects, environments, brands, or concepts not visible i
         return JsonResponse(processed)
 
     except json.JSONDecodeError as e:
-        logger.error(f'[AI Vision] Invalid JSON response: {e}')
+        logger.error(f'[AI Vision] Invalid JSON response for {file_name}: {e}')
         return JsonResponse({
             'error': 'AI returned invalid response format.',
             'technicalDetails': str(e),
             'canRetry': True,
         }, status=500)
     except Exception as e:
-        logger.error(f'[AI Vision Analysis Error]: {e}')
+        logger.error(f'[AI Vision Analysis Error] {file_name}: {e}')
         classified = classify_ai_error(e)
         return JsonResponse(classified, status=classified['statusCode'])
 
 
 @csrf_exempt
-async def image_to_prompt(request):
+def image_to_prompt(request):
     if request.method != 'POST':
         return JsonResponse({'error': 'Invalid request method'}, status=405)
 
@@ -414,7 +416,7 @@ Analyze the visual input deeply to reconstruct the most accurate, detailed, and 
 
 
 @csrf_exempt
-async def render_eps(request):
+def render_eps(request):
     if request.method != 'POST':
         return JsonResponse({'error': 'Invalid request method'}, status=405)
 
@@ -451,11 +453,14 @@ def check_models(request):
 
     api_key = request.session.get('gemini_api_keys', [None])[0] if request.session.get('gemini_api_keys') else None
 
+    if not api_key:
+        return JsonResponse({'error': 'No API key found. Please add a key first.', 'models': []}, status=400)
+
     results = []
     try:
         client = get_gemini_client(api_key)
     except ValueError as e:
-        return JsonResponse({'error': str(e)}, status=500)
+        return JsonResponse({'error': str(e), 'models': []}, status=400)
 
     for model_name in GEMINI_MODELS:
         start = time.time()

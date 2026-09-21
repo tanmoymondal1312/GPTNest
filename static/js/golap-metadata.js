@@ -207,6 +207,7 @@
                 var b64 = await readFileAsBase64(file);
                 var res = await fetch('/api/render-eps/', {
                     method: 'POST',
+                    credentials: 'same-origin',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ fileData: b64, fileName: file.name }),
                 });
@@ -417,7 +418,7 @@
         var container = $('gp-model-selector');
         if (!container) return;
 
-        fetch('/api/check-models/')
+        fetch('/api/check-models/', { credentials: 'same-origin' })
             .then(function (r) { return r.json(); })
             .then(function (data) {
                 var models = data.models || [];
@@ -463,7 +464,7 @@
     function checkApiKeys() {
         var warning = $('gp-api-warning');
         if (!warning) return;
-        fetch('/api/check-models/')
+        fetch('/api/check-models/', { credentials: 'same-origin' })
             .then(function (r) { return r.json(); })
             .then(function (data) {
                 var models = data.models || [];
