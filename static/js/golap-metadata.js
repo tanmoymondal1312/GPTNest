@@ -59,7 +59,7 @@
             headerActions.style.display = 'none';
             emptyCard.style.display = '';
             header.style.display = 'none';
-            platforms.style.display = 'none';
+            if (platforms) platforms.style.display = 'none';
             return;
         }
 
@@ -68,9 +68,9 @@
         headerActions.style.display = '';
         emptyCard.style.display = 'none';
         header.style.display = '';
-        platforms.style.display = '';
+        if (platforms) platforms.style.display = '';
 
-        MMUI.renderPlatformTabs(platforms, state.platform, function (id) {
+        if (platforms) MMUI.renderPlatformTabs(platforms, state.platform, function (id) {
             state.platform = id;
             if (state.selectedItem && state.selectedItem.analysis) {
                 handlePlatformChange();
@@ -544,16 +544,20 @@
             });
         });
 
-        $('gp-btn-regen-all').addEventListener('click', function () {
+        var regenBtn = $('gp-btn-regen-all');
+        if (regenBtn) regenBtn.addEventListener('click', function () {
             if (state.selectedItem) generateSingle(state.selectedItem);
         });
-        $('gp-btn-copy-all').addEventListener('click', function () {
+        var copyAllBtn = $('gp-btn-copy-all');
+        if (copyAllBtn) copyAllBtn.addEventListener('click', function () {
             if (!state.selectedItem) return;
             var text = 'Title: ' + (state.selectedItem.title || '') + '\n\nDescription: ' + (state.selectedItem.description || '') + '\n\nKeywords: ' + (state.selectedItem.keywords || []).join(', ');
             navigator.clipboard.writeText(text); MMUI.showToast('Copied', 'All metadata copied', 'success');
         });
-        $('gp-btn-csv').addEventListener('click', function () { MMExport.toCsv(state.items); });
-        $('gp-btn-json').addEventListener('click', function () { MMExport.toJson(state.items); });
+        var csvBtn = $('gp-btn-csv');
+        if (csvBtn) csvBtn.addEventListener('click', function () { MMExport.toCsv(state.items); });
+        var jsonBtn = $('gp-btn-json');
+        if (jsonBtn) jsonBtn.addEventListener('click', function () { MMExport.toJson(state.items); });
 
         // Sidebar sliders
         ['gp-min-title', 'gp-max-title', 'gp-min-kw', 'gp-max-kw', 'gp-min-desc', 'gp-max-desc'].forEach(function (id) {
