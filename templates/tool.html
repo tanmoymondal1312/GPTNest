@@ -528,6 +528,11 @@ document.addEventListener('DOMContentLoaded', function() {
         loadKeys();
         openApiModal();
     });
+    var addKeyWarningBtn = document.querySelector('.gp-btn-add-key');
+    if (addKeyWarningBtn) addKeyWarningBtn.addEventListener('click', function() {
+        loadKeys();
+        openApiModal();
+    });
     if (apiModalClose) apiModalClose.addEventListener('click', closeApiModal);
     if (apiModalDone) apiModalDone.addEventListener('click', closeApiModal);
     if (apiModalOverlay) apiModalOverlay.addEventListener('click', function(e) { if (e.target === apiModalOverlay) closeApiModal(); });

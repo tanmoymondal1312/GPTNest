@@ -459,11 +459,10 @@
     function checkApiKeys() {
         var warning = $('gp-api-warning');
         if (!warning) return;
-        fetch('/api/check-models/', { credentials: 'same-origin' })
+        fetch('/api/keys/', { credentials: 'same-origin' })
             .then(function (r) { return r.json(); })
             .then(function (data) {
-                var models = data.models || [];
-                var hasKeys = models.some(function (m) { return m.available; });
+                var hasKeys = (data.count || 0) > 0;
                 warning.style.display = hasKeys ? 'none' : '';
             })
             .catch(function () {
