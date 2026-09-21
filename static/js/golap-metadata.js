@@ -45,27 +45,32 @@
     }
 
     function updateView() {
-        var uploadView = $('gp-upload-view');
-        var detailView = $('gp-detail-view');
-        var batchView = $('gp-batch-view');
-        var promptView = $('gp-prompt-view');
+        var dropzone = $('gp-dropzone');
+        var fileListWrap = $('gp-file-list-wrap');
+        var headerActions = $('gp-upload-header-actions');
+        var emptyCard = $('gp-empty-card');
+        var resultsArea = $('gp-results-area');
         var header = $('gp-header');
         var platforms = $('gp-platforms');
 
-        uploadView.style.display = 'none';
-        detailView.style.display = 'none';
-        batchView.style.display = 'none';
-        promptView.style.display = 'none';
-        header.style.display = 'none';
-        platforms.style.display = 'none';
-
         if (state.items.length === 0) {
-            uploadView.style.display = '';
+            dropzone.style.display = '';
+            fileListWrap.style.display = 'none';
+            headerActions.style.display = 'none';
+            emptyCard.style.display = '';
+            resultsArea.style.display = 'none';
+            header.style.display = 'none';
+            platforms.style.display = 'none';
             return;
         }
 
+        dropzone.style.display = 'none';
+        fileListWrap.style.display = '';
+        headerActions.style.display = '';
+        emptyCard.style.display = 'none';
         header.style.display = '';
         platforms.style.display = '';
+
         MMUI.renderPlatformTabs(platforms, state.platform, function (id) {
             state.platform = id;
             if (state.selectedItem && state.selectedItem.analysis) {
@@ -74,17 +79,61 @@
             updateView();
         });
 
-        if (state.mode === 'prompt' && state.selectedItem) {
-            promptView.style.display = '';
-            MMUI.renderPromptView(promptView, state.selectedItem);
-        } else if (state.view === 'detail' && state.selectedItem) {
-            detailView.style.display = '';
-            MMUI.renderDetailView(detailView, state.selectedItem, state.platform, { onBind: bindDetailViewEvents });
-        } else if (state.items.length >= 1) {
-            batchView.style.display = '';
-            MMUI.renderBatchView(batchView, state.items, state.platform, { onBind: bindBatchViewEvents });
+        renderFileList();
+
+        var hasCompleted = state.items.some(function (i) { return i.status === 'completed'; });
+        if (hasCompleted || state.items.length > 1) {
+            resultsArea.style.display = '';
+            MMUI.renderBatchView(resultsArea, state.items, state.platform, { onBind: bindBatchViewEvents });
         } else {
-            uploadView.style.display = '';
+            resultsArea.style.display = 'none';
+        }
+    }
+
+    function renderFileList() {
+        var list = $('gp-file-list');
+        if (!list) return;
+        list.innerHTML = '';
+
+        state.items.forEach(function (item, idx) {
+            var statusMap = {
+                'idle': ['st-idle', 'Waiting'],
+                'preview_ready': ['st-ready', 'Ready'],
+                'rendering_eps': ['st-rendering', 'Rendering...'],
+                'analyzing': ['st-analyzing', 'Analyzing...'],
+                'completed': ['st-completed', 'Done'],
+                'error': ['st-error', 'Failed'],
+            };
+            var st = statusMap[item.status] || ['st-idle', item.status];
+            var sizeText = item.technicalDetails ? (item.technicalDetails.width + 'x' + item.technicalDetails.height) : (item.fileType || '');
+
+            var div = document.createElement('div');
+            div.className = 'gp-file-item';
+            div.setAttribute('data-idx', idx);
+            div.innerHTML =
+                '<img class="gp-file-thumb" src="' + (item.previewUrl || '') + '" alt="">' +
+                '<div class="gp-file-info">' +
+                    '<div class="gp-file-name">' + MMUI.escapeHtml(item.fileName) + '</div>' +
+                    '<div class="gp-file-meta">' + sizeText + (item.errorMessage ? ' &middot; ' + MMUI.escapeHtml(item.errorMessage) : '') + '</div>' +
+                '</div>' +
+                '<span class="gp-file-status ' + st[0] + '">' + st[1] + '</span>' +
+                '<button class="gp-file-remove" data-idx="' + idx + '" title="Remove">&times;</button>';
+            list.appendChild(div);
+        });
+
+        var doneCount = state.items.filter(function (i) { return i.status === 'completed'; }).length;
+        var failCount = state.items.filter(function (i) { return i.status === 'error'; }).length;
+        var pendingCount = state.items.filter(function (i) { return i.status === 'idle' || i.status === 'preview_ready' || i.status === 'rendering_eps'; }).length;
+        var analyzing = state.items.some(function (i) { return i.status === 'analyzing'; });
+
+        $('gp-file-count').textContent = state.items.length;
+        $('gp-file-done-count').textContent = doneCount;
+        $('gp-file-fail-count').textContent = failCount;
+
+        var genBtn = $('gp-generate-btn');
+        if (genBtn) {
+            genBtn.disabled = pendingCount === 0 && !analyzing;
+            genBtn.textContent = analyzing ? 'Generating...' : 'Generate All' + (pendingCount > 0 ? ' (' + pendingCount + ')' : '');
         }
     }
 
@@ -388,6 +437,26 @@
 
         var addBtn = $('gp-batch-add');
         if (addBtn) addBtn.addEventListener('click', function () { $('gp-file-input').click(); });
+
+        var addBtn2 = $('gp-results-add');
+        if (addBtn2) addBtn2.addEventListener('click', function () { $('gp-file-input').click(); });
+    }
+
+    function bindFileListEvents() {
+        var list = $('gp-file-list');
+        if (!list) return;
+        list.addEventListener('click', function (e) {
+            var btn = e.target.closest('.gp-file-remove');
+            if (!btn) return;
+            var idx = parseInt(btn.getAttribute('data-idx'));
+            if (idx >= 0 && idx < state.items.length) {
+                state.items.splice(idx, 1);
+                if (state.selectedItem && state.selectedItem.id === (state.items[idx] && state.items[idx].id)) {
+                    state.selectedItem = null;
+                }
+                updateView();
+            }
+        });
     }
 
     function checkAndRenderModels() {
@@ -472,6 +541,18 @@
         });
         fileInput.addEventListener('change', function (e) { handleFiles(Array.from(e.target.files)); fileInput.value = ''; });
 
+        var addMoreBtn = $('gp-add-more-btn');
+        if (addMoreBtn) addMoreBtn.addEventListener('click', function () { fileInput.click(); });
+
+        var clearAllBtn = $('gp-clear-all-btn');
+        if (clearAllBtn) clearAllBtn.addEventListener('click', function () {
+            state.items = []; state.selectedItem = null; state.view = 'upload';
+            updateView();
+        });
+
+        var generateBtn = $('gp-generate-btn');
+        if (generateBtn) generateBtn.addEventListener('click', function () { generateAllBatch(); });
+
         document.querySelectorAll('.gp-sample-btn').forEach(function (btn) {
             btn.addEventListener('click', function (e) {
                 e.stopPropagation();
@@ -496,11 +577,6 @@
             });
         });
 
-        $('gp-btn-back').addEventListener('click', function () {
-            state.selectedItem = null;
-            state.view = 'batch';
-            updateView();
-        });
         $('gp-btn-regen-all').addEventListener('click', function () {
             if (state.selectedItem) generateSingle(state.selectedItem);
         });
@@ -606,6 +682,7 @@
 
         applySettingsToUI();
         syncMetaSliders();
+        bindFileListEvents();
         updateView();
         checkAndRenderModels();
     }

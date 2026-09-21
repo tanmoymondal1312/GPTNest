@@ -167,11 +167,8 @@ window.MMUI = (function () {
             (failed > 0 ? ' &middot; <strong style="color:var(--error)">' + failed + '</strong> failed' : '') +
             '</div>' +
             '<div class="gp-batch-actions">' +
-            '<button class="gp-field-btn" id="gp-batch-add" type="button">+ Add Files</button>' +
-            '<button class="gp-field-btn primary" id="gp-batch-generate" type="button">⚡ Generate All' + (pending > 0 ? ' (' + pending + ')' : '') + '</button>' +
-            '<button class="gp-field-btn" id="gp-batch-export-csv" type="button">📥 CSV</button>' +
+            '<button class="gp-field-btn primary" id="gp-batch-export-csv" type="button">📥 Download CSV</button>' +
             '<button class="gp-field-btn" id="gp-batch-export-json" type="button">📥 JSON</button>' +
-            '<button class="gp-field-btn" id="gp-batch-clear" type="button">Clear All</button>' +
             '</div></div>' +
             '<table class="gp-table"><thead><tr><th><input type="checkbox" id="gp-check-all" title="Select all"></th><th>Preview</th><th>Filename</th><th>Title</th><th>Keywords</th><th>Status</th><th></th></tr></thead><tbody>' +
             items.map(function (item, idx) {

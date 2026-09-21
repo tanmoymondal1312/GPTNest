@@ -117,7 +117,6 @@
                 <span class="gp-platform-badge" id="gp-header-platform"></span>
             </div>
             <div class="gp-header-right">
-                <button class="gp-field-btn" id="gp-btn-back" type="button">&#8592; Files</button>
                 <button class="gp-field-btn" id="gp-btn-regen-all" type="button">&#8635; Regenerate</button>
                 <button class="gp-field-btn" id="gp-btn-copy-all" type="button">Copy All</button>
                 <button class="gp-field-btn primary" id="gp-btn-csv" type="button">CSV</button>
@@ -295,15 +294,21 @@
                     <!-- RIGHT PANEL: Upload + Output -->
                     <div class="gp-output-panel">
 
-                        <div class="gp-card">
+                        <div class="gp-card" id="gp-upload-card">
                             <div class="gp-card-header">
                                 <div>
-                                    <div class="gp-card-title">
+                                    <div class="gp-card-title" id="gp-upload-header-title">
                                         <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
                                         Upload Files
                                     </div>
                                 </div>
+                                <div class="gp-card-right" id="gp-upload-header-actions" style="display:none">
+                                    <button class="gp-pill-btn" id="gp-add-more-btn" type="button">+ Add More</button>
+                                    <button class="gp-pill-btn gp-pill-danger" id="gp-clear-all-btn" type="button">Clear All</button>
+                                </div>
                             </div>
+
+                            <!-- Dropzone: visible when no files -->
                             <div class="gp-upload-zone" id="gp-dropzone">
                                 <input type="file" id="gp-file-input" accept=".jpg,.jpeg,.png,.webp,.eps,.svg,.ai,image/*" multiple hidden>
                                 <div class="gp-upload-icon">
@@ -328,6 +333,22 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- File list: visible when files are selected -->
+                            <div class="gp-file-list-wrap" id="gp-file-list-wrap" style="display:none">
+                                <div class="gp-file-list" id="gp-file-list"></div>
+                                <div class="gp-file-list-footer">
+                                    <div class="gp-file-list-info">
+                                        <span id="gp-file-count">0</span> file(s) selected
+                                        &middot; <span id="gp-file-done-count">0</span> done
+                                        &middot; <span id="gp-file-fail-count">0</span> failed
+                                    </div>
+                                    <button class="gp-btn-generate" id="gp-generate-btn" type="button">
+                                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                                        Generate All
+                                    </button>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="gp-card gp-api-warning">
@@ -345,7 +366,21 @@
                             </div>
                         </div>
 
-                        <div class="gp-card">
+                        <!-- Progress bar -->
+                        <div class="gp-progress" id="gp-progress" style="display:none">
+                            <div class="gp-progress-track"><div class="gp-progress-fill" id="gp-progress-fill"></div></div>
+                            <div class="gp-progress-text" id="gp-progress-text"></div>
+                        </div>
+
+                        <div class="gp-rate-limit" id="gp-rate-limit" style="display:none">
+                            Rate limit reached. Waiting before retrying...
+                        </div>
+
+                        <!-- Inline results area -->
+                        <div id="gp-results-area" style="display:none"></div>
+
+                        <!-- Empty state: visible only when no files -->
+                        <div class="gp-card" id="gp-empty-card">
                             <div class="gp-empty-state">
                                 <div class="gp-empty-icon">
                                     <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
@@ -361,18 +396,7 @@
 
             </div>
 
-            <div class="gp-progress" id="gp-progress" style="display:none">
-                <div class="gp-progress-track"><div class="gp-progress-fill" id="gp-progress-fill"></div></div>
-                <div class="gp-progress-text" id="gp-progress-text"></div>
             </div>
-
-            <div class="gp-rate-limit" id="gp-rate-limit" style="display:none">
-                Rate limit reached. Waiting before retrying...
-            </div>
-
-            <div id="gp-detail-view" style="display:none"></div>
-            <div id="gp-batch-view" style="display:none"></div>
-            <div id="gp-prompt-view" style="display:none"></div>
         </div>
     </div>
 </div>
