@@ -176,6 +176,7 @@ window.MMQueue = (function () {
         return { total: totalCount, completed: completedCount, processing: activeCount, pending: queue.length, failed: failedCount, isPaused: isPaused, isProcessing: isProcessing, rateLimitWaiting: rateLimitWaiting };
     }
     function emitProgress() { if (onProgress) onProgress(getProgress()); }
+    function cancel() { isCancelled = true; isProcessing = false; isPaused = false; rateLimitWaiting = false; if (rateLimitTimer) { clearTimeout(rateLimitTimer); rateLimitTimer = null; } queue = []; activeCount = 0; }
 
     function pump() {
         if (isCancelled) return;
