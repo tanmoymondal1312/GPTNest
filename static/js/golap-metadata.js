@@ -58,7 +58,7 @@
             batchWorkspace.style.display = 'none';
             headerActions.style.display = 'none';
             emptyCard.style.display = '';
-            header.style.display = 'none';
+            if (header) header.style.display = 'none';
             if (platforms) platforms.style.display = 'none';
             return;
         }
@@ -67,7 +67,7 @@
         batchWorkspace.style.display = '';
         headerActions.style.display = '';
         emptyCard.style.display = 'none';
-        header.style.display = '';
+        if (header) header.style.display = '';
         if (platforms) platforms.style.display = '';
 
         if (platforms) MMUI.renderPlatformTabs(platforms, state.platform, function (id) {
