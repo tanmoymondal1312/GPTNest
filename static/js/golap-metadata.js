@@ -36,16 +36,9 @@
     }
 
     function _markReady(item) {
-        var valid = _validateItemForReady(item);
-        if (valid) {
+        if (_validateItemForReady(item)) {
             item.status = 'completed';
         } else {
-            console.warn('[MARK] Validation FAILED for:', item.fileName, {
-                hasItem: !!item, status: item.status, hasBase64: !!item.base64Data,
-                title: (item.title || '').substring(0, 30), titleLen: (item.title || '').length,
-                descLen: (item.description || '').length, kwCount: (item.keywords || []).length,
-                primaryCategory: item.primaryCategory || 'NONE'
-            });
             item.status = 'error';
             if (!item.errorMessage) item.errorMessage = 'Metadata validation failed: incomplete fields';
         }
@@ -309,7 +302,6 @@
         var pending = state.items.filter(function (i) { return (i.status === 'idle' || i.status === 'error' || i.status === 'preview_ready') && i.base64Data; });
         if (pending.length === 0) { MMUI.showToast('Info', 'No files to process', 'info'); return; }
 
-        console.log('[BATCH] Starting batch with', pending.length, 'items');
         state.isProcessing = true;
         renderBatchWorkspace();
 
@@ -318,17 +310,12 @@
                 renderBatchWorkspace();
             },
             onItemUpdated: function (updatedItem) {
-                console.log('[BATCH] onItemUpdated:', updatedItem.id, 'status:', updatedItem.status, 'title:', (updatedItem.title || '').substring(0, 30));
                 var target = _findItemById(updatedItem.id);
                 if (target) {
                     Object.assign(target, updatedItem);
                     if (target.status !== 'analyzing') {
-                        console.log('[BATCH] _markReady for:', target.fileName, 'status after:', target.status, 'title:', (target.title || '').substring(0, 30));
                         _markReady(target);
-                        console.log('[BATCH] After _markReady:', target.fileName, 'final status:', target.status);
                     }
-                } else {
-                    console.warn('[BATCH] Target not found for id:', updatedItem.id);
                 }
                 if (state.selectedItem && state.selectedItem.id === updatedItem.id) {
                     state.selectedItem = target || updatedItem;
@@ -339,7 +326,6 @@
                 state.isProcessing = false;
                 var failed = state.items.filter(function (i) { return i.status === 'error'; }).length;
                 var succeeded = state.items.filter(function (i) { return i.status === 'completed'; }).length;
-                console.log('[BATCH] Complete! succeeded:', succeeded, 'failed:', failed);
                 if (failed > 0 && succeeded === 0) {
                     MMUI.showToast('Generation Failed', 'All files failed. Check API key and try again.', 'error');
                 } else if (failed > 0) {

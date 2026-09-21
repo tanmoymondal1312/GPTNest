@@ -85,14 +85,12 @@ window.MMGeminiService = (function () {
                 });
                 lastStatus = res.status;
                 if (!res.ok) {
-                    console.error('[API] analyze-metadata error:', item.fileName, 'status:', res.status);
                     var errorData = await res.json().catch(function () { return {}; });
                     var e = new Error(errorData.error || 'HTTP ' + res.status);
                     e.errorCode = errorData.errorCode; e.technicalDetails = errorData.technicalDetails || errorData.error;
                     throw e;
                 }
                 var data = await res.json();
-                console.log('[API] analyze-metadata response:', item.fileName, 'keys:', Object.keys(data).join(', '));
                 var analysisData = data.analysis || data.visual_analysis || {
                     main_subject: 'Artwork', objects: [], visible_text: [], style: 'Graphic',
                     theme: 'Design', colors: [], background: 'Transparent', composition: 'Centered',
@@ -198,7 +196,6 @@ window.MMQueue = (function () {
         emitProgress();
         try {
             var result = await MMGeminiService.analyzeArtwork(item, settings, platform, false, myVersion, selectedModel);
-            console.log('[QUEUE] analyzeArtwork result:', item.fileName, 'success:', result.success, 'status:', result.item ? result.item.status : 'no-item');
             if (isCancelled) { activeCount--; return; }
             if (result.item && result.item.generationVersion && result.item.generationVersion < myVersion) {
                 activeCount--;
@@ -208,7 +205,6 @@ window.MMQueue = (function () {
             if (result.success) { completedCount++; } else { failedCount++; if (result.error && result.error.statusCode === 429) handleRateLimit(); }
             if (onItemUpdated) onItemUpdated(result.item);
         } catch (e) {
-            console.error('[QUEUE] processItem error:', item.fileName, e.message);
             failedCount++;
             if (onItemUpdated) onItemUpdated(Object.assign({}, item, { status: 'error', errorMessage: e.message || 'Failed.' }));
         } finally {
