@@ -2309,3 +2309,137 @@
     border-color: rgba(239, 68, 68, 0.4);
     transform: scale(1.1);
 }
+
+/* ============================================
+   Completion Dialog
+   ============================================ */
+
+.gp-complete-dialog {
+    background: #111113;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 20px;
+    padding: 48px 40px 36px;
+    max-width: 420px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6);
+    animation: gpSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes gpSlideUp {
+    from { opacity: 0; transform: translateY(24px) scale(0.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.gp-complete-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.12), rgba(34, 197, 94, 0.04));
+    border: 1.5px solid rgba(34, 197, 94, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    color: #22c55e;
+    animation: gpCheckPop 0.5s 0.15s both;
+}
+
+@keyframes gpCheckPop {
+    0% { transform: scale(0.5); opacity: 0; }
+    60% { transform: scale(1.1); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.gp-complete-title {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: #e8e8ec;
+    margin: 0 0 8px;
+}
+
+.gp-complete-desc {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.45);
+    margin: 0 0 20px;
+}
+
+.gp-complete-stats {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 28px;
+}
+
+.gp-stat {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    padding: 12px 20px;
+    text-align: center;
+    min-width: 80px;
+}
+
+.gp-stat.err {
+    border-color: rgba(239, 68, 68, 0.2);
+    background: rgba(239, 68, 68, 0.04);
+}
+
+.gp-stat-num {
+    display: block;
+    font-size: 28px;
+    font-weight: 800;
+    font-family: 'Space Grotesk', sans-serif;
+    color: #e8e8ec;
+    line-height: 1;
+}
+
+.gp-stat.err .gp-stat-num {
+    color: #ef4444;
+}
+
+.gp-stat-label {
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(255, 255, 255, 0.3);
+    margin-top: 4px;
+}
+
+.gp-complete-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.gp-complete-btn {
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s ease;
+}
+
+.gp-complete-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #e8e8ec;
+}
+
+.gp-complete-btn.primary {
+    background: rgba(34, 197, 94, 0.1);
+    border-color: rgba(34, 197, 94, 0.3);
+    color: #22c55e;
+}
+
+.gp-complete-btn.primary:hover {
+    background: rgba(34, 197, 94, 0.18);
+}

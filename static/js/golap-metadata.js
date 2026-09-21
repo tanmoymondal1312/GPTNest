@@ -9,6 +9,7 @@
         selectedModel: '',
         isProcessing: false,
     };
+    window.MMState = state;
 
     var DEFAULT_SETTINGS = {
         minTitleWords: 8, maxTitleWords: 22, minKeywords: 25, maxKeywords: 49,
@@ -359,7 +360,18 @@
                     MMUI.showToast('Batch Complete', 'All ' + succeeded + ' files processed successfully.', 'success');
                 }
                 renderBatchWorkspace();
-                setTimeout(function () { MMExport.toCsv(state.items); }, 800);
+                setTimeout(function () {
+                    var overlay = $('gp-complete-overlay');
+                    var desc = $('gp-complete-desc');
+                    var stats = $('gp-complete-stats');
+                    if (overlay) {
+                        desc.textContent = succeeded + ' files processed successfully.' + (failed > 0 ? ' ' + failed + ' failed.' : '');
+                        stats.innerHTML =
+                            '<div class="gp-stat"><span class="gp-stat-num">' + succeeded + '</span><span class="gp-stat-label">Completed</span></div>' +
+                            (failed > 0 ? '<div class="gp-stat err"><span class="gp-stat-num">' + failed + '</span><span class="gp-stat-label">Failed</span></div>' : '');
+                        overlay.style.display = 'flex';
+                    }
+                }, 2000);
             },
         }, state.selectedModel);
     }

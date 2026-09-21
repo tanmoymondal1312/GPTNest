@@ -475,6 +475,29 @@
     </div>
 </div>
 
+<!-- Completion Dialog -->
+<div class="gp-modal-overlay" id="gp-complete-overlay" style="display:none">
+    <div class="gp-complete-dialog">
+        <div class="gp-complete-icon">
+            <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+        </div>
+        <h2 class="gp-complete-title">Generation Complete!</h2>
+        <p class="gp-complete-desc" id="gp-complete-desc">All files processed successfully.</p>
+        <div class="gp-complete-stats" id="gp-complete-stats"></div>
+        <div class="gp-complete-actions">
+            <button class="gp-complete-btn primary" id="gp-complete-csv" type="button">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Download CSV
+            </button>
+            <button class="gp-complete-btn" id="gp-complete-json" type="button">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Download JSON
+            </button>
+            <button class="gp-complete-btn" id="gp-complete-close" type="button">Close</button>
+        </div>
+    </div>
+</div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     var toggle = document.getElementById('gp-settings-toggle');
@@ -614,6 +637,27 @@ document.addEventListener('DOMContentLoaded', function() {
         .catch(function() {
             loadKeys(false);
         });
+
+    var completeOverlay = document.getElementById('gp-complete-overlay');
+    var completeClose = document.getElementById('gp-complete-close');
+    var completeCsv = document.getElementById('gp-complete-csv');
+    var completeJson = document.getElementById('gp-complete-json');
+
+    function closeCompleteDialog() {
+        if (completeOverlay) completeOverlay.style.display = 'none';
+    }
+    if (completeClose) completeClose.addEventListener('click', closeCompleteDialog);
+    if (completeOverlay) completeOverlay.addEventListener('click', function(e) {
+        if (e.target === completeOverlay) closeCompleteDialog();
+    });
+    if (completeCsv) completeCsv.addEventListener('click', function() {
+        closeCompleteDialog();
+        if (window.MMExport && MMExport.toCsv) MMExport.toCsv(window.MMState ? MMState.items : []);
+    });
+    if (completeJson) completeJson.addEventListener('click', function() {
+        closeCompleteDialog();
+        if (window.MMExport && MMExport.toJson) MMExport.toJson(window.MMState ? MMState.items : []);
+    });
 });
 </script>
 {% endblock %}
