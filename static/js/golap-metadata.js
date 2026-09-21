@@ -150,22 +150,17 @@
             var kwCount = item.keywords ? item.keywords.length : 0;
 
             var tr = document.createElement('tr');
+            var thumbHtml = item.previewUrl
+                ? '<img class="gp-table-thumb" src="' + item.previewUrl + '" alt="">'
+                : '<span class="gp-table-thumb gp-thumb-placeholder">' + MMUI.escapeHtml((item.fileName || '').split('.').pop().toUpperCase()) + '</span>';
             tr.innerHTML =
-                '<td class="gp-bt-check"><input type="checkbox" class="gp-batch-check" data-idx="' + idx + '"></td>' +
-                '<td class="gp-bt-thumb"><img class="gp-table-thumb" src="' + (item.previewUrl || '') + '" alt=""></td>' +
+                '<td class="gp-bt-thumb">' + thumbHtml + '</td>' +
                 '<td class="gp-bt-name"><span class="gp-bt-filename" title="' + MMUI.escapeHtml(item.fileName) + '">' + MMUI.escapeHtml(item.fileName) + '</span></td>' +
                 '<td class="gp-bt-title"><span class="gp-bt-title-text">' + MMUI.escapeHtml(item.title || (item.status === 'error' ? (item.errorMessage || '\u2014') : '\u2014')) + '</span></td>' +
                 '<td class="gp-bt-kw" style="text-align:center">' + kwCount + '</td>' +
                 '<td class="gp-bt-status"><span class="gp-status-pill ' + st[0] + '">' + (st[2] ? '<span class="gp-spinner"></span> ' : '') + st[1] + '</span></td>';
             tbody.appendChild(tr);
         });
-
-        var checkAll = $('gp-check-all');
-        if (checkAll) {
-            checkAll.addEventListener('change', function () {
-                document.querySelectorAll('.gp-batch-check').forEach(function (cb) { cb.checked = checkAll.checked; });
-            });
-        }
     }
 
     function _findItemById(id) {

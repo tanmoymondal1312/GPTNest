@@ -1388,14 +1388,6 @@ svg {
     opacity: 1;
 }
 
-.gp-check-all,
-.gp-batch-check {
-    width: 15px;
-    height: 15px;
-    accent-color: var(--primary);
-    cursor: pointer;
-}
-
 /* Status Badge */
 .gp-status-badge {
     font-size: 0.68rem;

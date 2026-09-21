@@ -140,7 +140,6 @@
     background: rgba(255,255,255,0.03);
 }
 
-.gp-bt-check { width: 36px; }
 .gp-bt-thumb { width: 40px; }
 .gp-bt-name { min-width: 140px; }
 .gp-bt-title { min-width: 180px; }
@@ -153,6 +152,17 @@
     border-radius: 4px;
     object-fit: cover;
     background: var(--bg-input);
+}
+
+.gp-thumb-placeholder {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+    border: 1px dashed var(--border-primary);
 }
 
 .gp-status-pill {

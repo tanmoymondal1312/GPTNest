@@ -170,13 +170,12 @@ window.MMUI = (function () {
             '<button class="gp-field-btn primary" id="gp-batch-export-csv" type="button">📥 Download CSV</button>' +
             '<button class="gp-field-btn" id="gp-batch-export-json" type="button">📥 JSON</button>' +
             '</div></div>' +
-            '<table class="gp-table"><thead><tr><th><input type="checkbox" id="gp-check-all" title="Select all"></th><th>Preview</th><th>Filename</th><th>Title</th><th>Keywords</th><th>Status</th><th></th></tr></thead><tbody>' +
+            '<table class="gp-table"><thead><tr><th>Preview</th><th>Filename</th><th>Title</th><th>Keywords</th><th>Status</th><th></th></tr></thead><tbody>' +
             items.map(function (item, idx) {
                 var statusClass = item.status === 'completed' ? 'done' : item.status === 'analyzing' ? 'analyzing' : item.status === 'error' ? 'failed' : 'ready';
                 var statusText = item.status === 'completed' ? 'Done' : item.status === 'analyzing' ? 'Analyzing...' : item.status === 'rendering_eps' ? 'Rendering...' : item.status === 'error' ? 'Failed' : 'Ready';
                 var errorTip = item.status === 'error' && item.errorMessage ? ' title="' + escapeHtml(item.errorMessage) + '"' : '';
                 return '<tr data-idx="' + idx + '">' +
-                    '<td><input type="checkbox" class="gp-batch-check" data-idx="' + idx + '"></td>' +
                     '<td><img class="gp-table-thumb" src="' + (item.previewUrl || '') + '" alt=""></td>' +
                     '<td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + escapeHtml(item.fileName) + '">' + escapeHtml(item.fileName) + '</td>' +
                     '<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + escapeHtml(item.title || (item.status === 'error' ? (item.errorMessage || '—') : '—')) + '</td>' +
