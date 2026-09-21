@@ -216,6 +216,20 @@
                 item.status = 'error';
                 item.errorMessage = 'EPS render failed: ' + e.message;
             }
+        } else if (file.name.toLowerCase().endsWith('.svg') || file.name.toLowerCase().endsWith('.ai')) {
+            try {
+                var b64Data = await readFileAsBase64(file);
+                var ext = file.name.split('.').pop().toLowerCase();
+                var dataUrl = 'data:' + (ext === 'svg' ? 'image/svg+xml' : 'application/postscript') + ';base64,' + b64Data;
+                item.base64Data = b64Data;
+                item.previewUrl = dataUrl;
+                item.fileType = ext;
+                item.mimeType = ext === 'svg' ? 'image/svg+xml' : 'application/postscript';
+                item.status = 'preview_ready';
+            } catch (e) {
+                item.status = 'error';
+                item.errorMessage = 'File processing failed: ' + e.message;
+            }
         } else {
             try {
                 var result = await processImageFile(file);
