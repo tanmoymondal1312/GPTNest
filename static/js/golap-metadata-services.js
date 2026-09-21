@@ -1,5 +1,5 @@
 window.MMConfig = {
-    GEMINI_MODELS: ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'],
+    GEMINI_MODELS: ['gemini-3.6-flash', 'gemini-3.7-flash', 'gemini-3.5-flash'],
     MAX_CONCURRENT: 1,
     RETRY_DELAYS: [2000, 4000],
     MAX_RETRY: 2,
@@ -37,7 +37,7 @@ window.MMGeminiService = (function () {
         if (!meta.title || meta.title.trim().length < 3) return { valid: false, reason: 'Title is empty or too short' };
         if (!meta.description || meta.description.trim().length < 10) return { valid: false, reason: 'Description is empty or too short' };
         if (!meta.keywords || !Array.isArray(meta.keywords) || meta.keywords.length === 0) return { valid: false, reason: 'No keywords' };
-        if (!meta.category) return { valid: false, reason: 'Missing category' };
+        if (!meta.primaryCategory && !meta.category) return { valid: false, reason: 'Missing category' };
         return { valid: true };
     }
 

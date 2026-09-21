@@ -5,7 +5,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash']
+GEMINI_MODELS = ['gemini-3.6-flash', 'gemini-3.7-flash', 'gemini-3.5-flash']
 GEMINI_MODEL = GEMINI_MODELS[0]
 BACKOFF_DELAYS = [2000, 4000]
 
