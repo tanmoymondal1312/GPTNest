@@ -231,20 +231,6 @@
         }
         if (pending.length === 0) { MMUI.showToast('Info', checkedIndices.length > 0 ? 'Selected files already processed or no artwork' : 'No files to process', 'info'); return; }
 
-        var hasApiKeys = false;
-        try {
-            var kr = await fetch('/api/keys/');
-            var kd = await kr.json();
-            hasApiKeys = kd.keys && kd.keys.length > 0;
-        } catch (e) { /* ignore */ }
-
-        if (!hasApiKeys) {
-            MMUI.showToast('API Key Required', 'Please add a Gemini API key before generating metadata.', 'error');
-            var modal = document.getElementById('gp-api-modal-overlay');
-            if (modal) modal.style.display = '';
-            return;
-        }
-
         var progressEl = $('gp-progress');
         var fillEl = $('gp-progress-fill');
         var textEl = $('gp-progress-text');
@@ -263,7 +249,9 @@
                 var target = _findItemById(updatedItem.id);
                 if (target) {
                     Object.assign(target, updatedItem);
-                    _markReady(target);
+                    if (target.status !== 'analyzing') {
+                        _markReady(target);
+                    }
                 }
                 if (state.selectedItem && state.selectedItem.id === updatedItem.id) {
                     state.selectedItem = target || updatedItem;
