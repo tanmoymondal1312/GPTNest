@@ -18,6 +18,23 @@ from .gemini_client import (
     get_cached_analysis,
     set_cached_analysis,
 )
+from .models import ApiKey
+
+
+def _get_user_keys(user):
+    return list(ApiKey.objects.filter(user=user).values_list('key', flat=True))
+
+
+def _add_user_key(user, key):
+    if ApiKey.objects.filter(user=user, key=key).exists():
+        return False
+    ApiKey.objects.create(user=user, key=key)
+    return True
+
+
+def _delete_user_key(user, key):
+    deleted, _ = ApiKey.objects.filter(user=user, key=key).delete()
+    return deleted > 0
 from .eps_renderer import render_eps_to_png
 from .platforms import PLATFORMS
 from .validation import (
@@ -289,7 +306,8 @@ def analyze_metadata(request):
         logger.info(f'[AI Vision Cache Hit] Reusing visual analysis for {file_name or "artwork"}')
         return JsonResponse(cached)
 
-    api_key = body.get('apiKey') or (request.session.get('gemini_api_keys', [None])[0] if request.session.get('gemini_api_keys') else None)
+    user_keys = _get_user_keys(request.user)
+    api_key = body.get('apiKey') or (user_keys[0] if user_keys else None)
 
     logger.info(f'[AI Vision] Processing {file_name} | key={"yes" if api_key else "NO"} | model={requested_model or GEMINI_MODEL}')
 
@@ -374,7 +392,8 @@ def image_to_prompt(request):
     mime_type = body.get('mimeType', 'image/png')
     file_name = body.get('fileName', 'artwork')
 
-    api_key = body.get('apiKey') or (request.session.get('gemini_api_keys', [None])[0] if request.session.get('gemini_api_keys') else None)
+    user_keys = _get_user_keys(request.user)
+    api_key = body.get('apiKey') or (user_keys[0] if user_keys else None)
 
     try:
         client = get_gemini_client(api_key)
@@ -451,7 +470,8 @@ def check_models(request):
     from .gemini_client import GEMINI_MODELS
     import time
 
-    api_key = request.session.get('gemini_api_keys', [None])[0] if request.session.get('gemini_api_keys') else None
+    user_keys = _get_user_keys(request.user)
+    api_key = user_keys[0] if user_keys else None
 
     if not api_key:
         return JsonResponse({'error': 'No API key found. Please add a key first.', 'models': []}, status=400)
@@ -501,7 +521,7 @@ def api_keys_list(request):
     if request.method != 'GET':
         return JsonResponse({'error': 'Invalid request method'}, status=405)
 
-    keys = request.session.get('gemini_api_keys', [])
+    keys = _get_user_keys(request.user)
     masked = []
     for k in keys:
         masked.append({
@@ -529,15 +549,10 @@ def api_keys_add(request):
     if len(key) < 20:
         return JsonResponse({'error': 'Invalid API key format.'}, status=400)
 
-    keys = request.session.get('gemini_api_keys', [])
-    if key in keys:
+    if not _add_user_key(request.user, key):
         return JsonResponse({'error': 'This key is already added.'}, status=400)
 
-    keys.append(key)
-    request.session['gemini_api_keys'] = keys
-    request.session.modified = True
-
-    return JsonResponse({'success': True, 'count': len(keys)})
+    return JsonResponse({'success': True, 'count': len(_get_user_keys(request.user))})
 
 
 @csrf_exempt
@@ -555,13 +570,9 @@ def api_keys_delete(request):
     if not key:
         return JsonResponse({'error': 'API key is required.'}, status=400)
 
-    keys = request.session.get('gemini_api_keys', [])
-    if key in keys:
-        keys.remove(key)
-        request.session['gemini_api_keys'] = keys
-        request.session.modified = True
+    _delete_user_key(request.user, key)
 
-    return JsonResponse({'success': True, 'count': len(keys)})
+    return JsonResponse({'success': True, 'count': len(_get_user_keys(request.user))})
 
 
 @csrf_exempt
@@ -570,7 +581,7 @@ def api_keys_get_first(request):
     if request.method != 'GET':
         return JsonResponse({'error': 'Invalid request method'}, status=405)
 
-    keys = request.session.get('gemini_api_keys', [])
+    keys = _get_user_keys(request.user)
     if keys:
         return JsonResponse({'key': keys[0], 'has_key': True})
     return JsonResponse({'key': None, 'has_key': False})
@@ -584,7 +595,7 @@ def api_settings_get(request):
 
     return JsonResponse({
         'model': request.session.get('selected_model', ''),
-        'has_keys': len(request.session.get('gemini_api_keys', [])) > 0,
+        'has_keys': _get_user_keys(request.user).__len__() > 0,
     })
 
 
