@@ -7,6 +7,7 @@
         view: 'upload',
         settings: loadSettings(),
         selectedModel: '',
+        isProcessing: false,
     };
 
     var DEFAULT_SETTINGS = {
@@ -87,7 +88,7 @@
         var failed = items.filter(function (i) { return i.status === 'error'; }).length;
         var processing = items.filter(function (i) { return i.status === 'analyzing' || i.status === 'rendering_eps'; }).length;
         var pending = items.filter(function (i) { return i.status === 'idle' || i.status === 'preview_ready'; }).length;
-        var analyzing = processing > 0;
+        var isActive = state.isProcessing || processing > 0;
 
         $('gp-counter-total').querySelector('.gp-counter-val').textContent = total;
         $('gp-counter-done').querySelector('.gp-counter-val').textContent = done;
@@ -101,7 +102,7 @@
         var pct = total > 0 ? (done / total * 100) : 0;
         var progressBar = $('gp-batch-progress');
         var progressFill = $('gp-batch-progress-fill');
-        if (analyzing) {
+        if (isActive) {
             progressBar.style.display = '';
             progressFill.style.width = pct + '%';
         } else {
@@ -109,7 +110,7 @@
         }
 
         var actionsEl = $('gp-batch-status-actions');
-        var allDone = total > 0 && pending === 0 && processing === 0;
+        var allDone = total > 0 && pending === 0 && processing === 0 && !state.isProcessing;
 
         if (allDone) {
             actionsEl.innerHTML =
@@ -117,18 +118,15 @@
                 '<button class="gp-field-btn" id="gp-act-json" type="button">Download JSON</button>';
             $('gp-act-csv').addEventListener('click', function () { MMExport.toCsv(state.items); });
             $('gp-act-json').addEventListener('click', function () { MMExport.toJson(state.items); });
+        } else if (isActive) {
+            actionsEl.innerHTML =
+                '<button class="gp-gen-btn running" type="button" disabled><span class="gp-gen-spinner"></span> Generating\u2026 (' + done + '/' + total + ')</button>';
+        } else if (pending > 0) {
+            actionsEl.innerHTML =
+                '<button class="gp-gen-btn" id="gp-act-generate" type="button">\u26A1 Generate All (' + pending + ')</button>';
+            $('gp-act-generate').addEventListener('click', function () { generateAllBatch(); });
         } else {
-            var pendingCount = items.filter(function (i) { return i.status === 'idle' || i.status === 'preview_ready'; }).length;
-            if (analyzing) {
-                actionsEl.innerHTML =
-                    '<button class="gp-gen-btn running" type="button" disabled><span class="gp-gen-spinner"></span> Generating\u2026</button>';
-            } else if (pendingCount > 0) {
-                actionsEl.innerHTML =
-                    '<button class="gp-gen-btn" id="gp-act-generate" type="button">\u26A1 Generate All (' + pendingCount + ')</button>';
-                $('gp-act-generate').addEventListener('click', function () { generateAllBatch(); });
-            } else {
-                actionsEl.innerHTML = '';
-            }
+            actionsEl.innerHTML = '';
         }
 
         renderBatchTable();
@@ -303,9 +301,11 @@
         var pending = state.items.filter(function (i) { return (i.status === 'idle' || i.status === 'error' || i.status === 'preview_ready') && i.base64Data; });
         if (pending.length === 0) { MMUI.showToast('Info', 'No files to process', 'info'); return; }
 
+        state.isProcessing = true;
+        renderBatchWorkspace();
+
         MMQueue.startBatch(state.items, state.settings, state.platform, {
             onProgress: function (p) {
-                var pct = p.total > 0 ? (p.completed / p.total * 100) : 0;
                 renderBatchWorkspace();
             },
             onItemUpdated: function (updatedItem) {
@@ -322,6 +322,7 @@
                 renderBatchWorkspace();
             },
             onBatchComplete: function () {
+                state.isProcessing = false;
                 var failed = state.items.filter(function (i) { return i.status === 'error'; }).length;
                 var succeeded = state.items.filter(function (i) { return i.status === 'completed'; }).length;
                 if (failed > 0 && succeeded === 0) {
