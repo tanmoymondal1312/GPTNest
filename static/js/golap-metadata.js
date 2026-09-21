@@ -154,12 +154,28 @@
                 ? '<img class="gp-table-thumb" src="' + item.previewUrl + '" alt="">'
                 : '<span class="gp-table-thumb gp-thumb-placeholder">' + MMUI.escapeHtml((item.fileName || '').split('.').pop().toUpperCase()) + '</span>';
             tr.innerHTML =
+                '<td class="gp-bt-remove"><button class="gp-remove-file-btn" data-idx="' + idx + '" type="button" title="Remove file">\u2715</button></td>' +
                 '<td class="gp-bt-thumb">' + thumbHtml + '</td>' +
                 '<td class="gp-bt-name"><span class="gp-bt-filename" title="' + MMUI.escapeHtml(item.fileName) + '">' + MMUI.escapeHtml(item.fileName) + '</span></td>' +
                 '<td class="gp-bt-title"><span class="gp-bt-title-text">' + MMUI.escapeHtml(item.title || (item.status === 'error' ? (item.errorMessage || '\u2014') : '\u2014')) + '</span></td>' +
                 '<td class="gp-bt-kw" style="text-align:center">' + kwCount + '</td>' +
                 '<td class="gp-bt-status"><span class="gp-status-pill ' + st[0] + '">' + (st[2] ? '<span class="gp-spinner"></span> ' : '') + st[1] + '</span></td>';
             tbody.appendChild(tr);
+        });
+
+        tbody.querySelectorAll('.gp-remove-file-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var idx = parseInt(btn.dataset.idx);
+                state.items.splice(idx, 1);
+                if (state.selectedItem && state.selectedItem.id === state.items[idx]?.id) {
+                    state.selectedItem = null;
+                }
+                if (state.items.length === 0) {
+                    state.isProcessing = false;
+                    state.view = 'upload';
+                }
+                updateView();
+            });
         });
     }
 
@@ -524,7 +540,7 @@
 
         var clearAllBtn = $('gp-clear-all-btn');
         if (clearAllBtn) clearAllBtn.addEventListener('click', function () {
-            state.items = []; state.selectedItem = null; state.view = 'upload';
+            state.items = []; state.selectedItem = null; state.view = 'upload'; state.isProcessing = false;
             updateView();
         });
 
